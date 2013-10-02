@@ -1,4 +1,4 @@
 mjp
 ===
 
-An opinionated micro Javascript library
+An opinionated Javascript micro library
