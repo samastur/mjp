@@ -18,7 +18,6 @@
 	"browser": true,
 
 	"globals": {
-		"jQuery": true,
 		"define": true,
 		"module": true
 	}

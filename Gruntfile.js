@@ -51,8 +51,8 @@ module.exports = function( grunt ) {
             }
         },
         watch: {
-            files: [ "<%= jshint.grunt.src %>", "<%= jshint.tests.src %>", "src/*.js" ],
-            tasks: "dev"
+            files: [ "src/**/*.js", "test/**/*.html" ],
+            tasks: ["test"]
         },
         "pre-uglify": {
             all: {
@@ -96,6 +96,9 @@ module.exports = function( grunt ) {
                     tempFiles: [ "dist/mjp.pre-min.js" ]
                 }
             }
+        },
+        qunit: {
+            all: ["tests/**/*.html"]
         }
     });
 
@@ -104,12 +107,16 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( "grunt-contrib-jshint" );
     grunt.loadNpmTasks( "grunt-contrib-watch" );
     grunt.loadNpmTasks( "grunt-contrib-uglify" );
+    grunt.loadNpmTasks( "grunt-contrib-qunit" );
 
     // Load custom tasks
     grunt.loadTasks( "build/tasks" );
 
     // Short list as a high frequency watch task
     grunt.registerTask( "dev", [ "build:*:*", "jshint" ] );
+
+    // Test
+    grunt.registerTask( "test", [ "jshint", "qunit" ] );
 
     // Default grunt
     grunt.registerTask( "default", [ "dev", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
