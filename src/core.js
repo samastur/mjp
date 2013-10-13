@@ -1,22 +1,38 @@
 define(function () {
-    /*
-     * MICRO JS LIB
-     *
-     * If you encounter a non-trivial bug, switch to jquip or jquery.
-     * Otherwise fix it :)
-     *
-     */
-
-    // Utils (.each...)
     function _forEach(func) {
-        var l = this.length, i = 0, rtn = null;
-        for(;i<l;i++) {
-            rtn = func(i, this[i]);
-            if (rtn === false) { // Break out on false
-                break;
+        var l = this.length || 0, i = 0, rtn = null, prop = null;
+        if (this.length !== undefined) {
+            for(;i<l;i++) {
+                rtn = func(i, this[i]);
+                if (rtn === false) { // Break out on false
+                    break;
+                }
+            }
+        } else { // Object
+            for(prop in this) {
+                if (this.hasOwnProperty(prop)) {
+                    rtn = func(i, this[prop]);
+                    if (rtn === false) { // Break out on false
+                        break;
+                    }
+                }
+                i++;
             }
         }
         return this;
+    }
+
+    function extend() {
+        var target = arguments[0], obj = null, i=1, k;
+        for(; i<arguments.length; i++) {
+            obj = arguments[i];
+            for(k in obj) {
+                if (obj.hasOwnProperty(k) && obj[k] !== null && obj[k] !== undefined) {
+                    target[k] = obj[k];
+                }
+            }
+        }
+        return target;
     }
 
     function trim(txt) {
@@ -29,18 +45,6 @@ define(function () {
                 txt.toString().replace(trimLeft, "").replace(trimRight, "");
     }
 
-    // Event handlers
-    function on(ev_type, handler) { // For IE8
-        this.each(function (i, node) {
-            if (node.addEventListener) {
-                node.addEventListener(ev_type, handler);
-            } else if (node.attachEvent) {
-                node.attachEvent("on"+ev_type, handler);
-            }
-        });
-        return this;
-    }
-
     // HTML "templating"
     function innerHTML(template) {
         var div = document.createElement("div");
@@ -48,77 +52,57 @@ define(function () {
         return div.removeChild(div.firstChild);
     }
 
-    // class functions (addClass, hasClass, removeClass)
-    function hasClass(value) {
-        var has = false, cls = "";
-        this.each(function(i, el) {
-            cls = " "+el.className+" ";
-            if (cls.search(" "+value+" ") > -1) {
-                has = true;
-                return false;
-            }
-        });
-        return has;
-    }
+    var fn = {
+            each: _forEach,
 
-    function addClass(value) {
-        this.each(function(i, el) {
-            if (!mjp(el).hasClass(value)) {
-                el.className = mjp.trim(el.className) + " "+value;
-            }
-        });
-        return this;
-    }
-
-    function removeClass(value) {
-        this.each(function(i, el) {
-            var cls = " "+el.className+" ", new_cls = "";
-            new_cls = cls.replace(" "+value+" ", "");
-            if (new_cls !== cls) {
-                el.className = mjp.trim(new_cls);
-            }
-        });
-        return this;
-    }
-
-    // Main
-    var mjp = function (sel, context) {
-        var raw_nodes = [], nodes = [],
-            root = context || document,
-            sel_type = typeof sel;
-
-        if (sel_type === "string") {
-            if (sel.slice(0, 1) === "<") {
-                raw_nodes = [innerHTML(sel)];
-            } else {
-                raw_nodes = root.querySelectorAll(sel);
-            }
-        } else if (sel_type === "object") {
-            if (sel.length) {
-                if (Array.isArray(sel)) {
-                    nodes = sel;
+            html: function (value) {
+                if (value) {
+                    this.each(function (i, el) {
+                        el.innerHTML = value;
+                    });
                 } else {
-                    raw_nodes = sel;
+                    return this.length ? this[0].innerHTML : "";
                 }
-            } else {
-                nodes = [sel];
             }
-        }
-        if (raw_nodes.length) {
-            raw_nodes.forEach = _forEach;
-            raw_nodes.forEach(function (i, node) {
-                nodes.push(node);
-            });
-        }
-        // Add useful methods (TODO: create extend object method)
-        nodes.each = _forEach;
-        nodes.hasClass = hasClass;
-        nodes.addClass = addClass;
-        nodes.removeClass = removeClass;
-        nodes.on = on;
-        return nodes;
-    };
+        },
+
+        // Main
+        mjp = function (sel, context) {
+            var raw_nodes = [], nodes = [],
+                root = context || document,
+                sel_type = typeof sel;
+
+            if (sel_type === "string") {
+                if (sel.slice(0, 1) === "<") {
+                    raw_nodes = [innerHTML(sel)];
+                } else {
+                    raw_nodes = root.querySelectorAll(sel);
+                }
+            } else if (sel_type === "object") {
+                if (sel.length) {
+                    if (Array.isArray(sel)) {
+                        nodes = sel;
+                    } else {
+                        raw_nodes = sel;
+                    }
+                } else {
+                    nodes = [sel];
+                }
+            }
+            if (raw_nodes.length) {
+                raw_nodes.forEach = _forEach;
+                raw_nodes.forEach(function (i, node) {
+                    nodes.push(node);
+                });
+            }
+            // Add useful methods (TODO: create extend object method)
+            extend(nodes, mjp.fn);
+            return nodes;
+        };
+
+    mjp.fn = fn;
     mjp.trim = trim;
+    mjp.extend = extend;
 
     return mjp;
 });

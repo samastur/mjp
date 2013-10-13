@@ -1,5 +1,7 @@
 define([
-    "./core"
+    "./core",
+    "./classes",
+    "./events"
 ], function (mjp) {
     return (window.mjp = window.$ = mjp);
 });
