@@ -24,8 +24,8 @@ module.exports = function( grunt ) {
             // Avoid breaking semicolons inserted by r.js
             skipSemiColonInsertion: true,
             wrap: {
-                startFile: "src/header.js",
-                endFile: "src/footer.js"
+                startFile: "src/wrappers/header.js",
+                endFile: "src/wrappers/footer.js"
             },
             rawText: {},
             onBuildWrite: convert
