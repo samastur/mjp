@@ -14,4 +14,6 @@ define([
             return this;
         }
     });
+
+    return mjp;
 });
