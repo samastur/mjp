@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>QUnit Classes Tests</title>
+        <link rel="stylesheet" href="lib/qunit-1.12.0.css">
+    </head>
+    <body>
+        <div id="qunit"></div>
+        <div id="qunit-fixture">
+            <p class="class1 class2 class3">Some text</p>
+        </div>
+        <script src="lib/qunit-1.12.0.js"></script>
+        <script src="../node_modules/requirejs/require.js"></script>
+        <script>
+require(['../src/classes'], function (mjp) {
+    var ctx = document.getElementById("qunit-fixture");
+
+    test("Test hasClass", function () {
+        ok(mjp(".class1", ctx).hasClass("class2"),
+           "Paragraph has class class1");
+    });
+
+    test("Test hasClass", function () {
+        ok(!mjp(".class1", ctx).hasClass("class4"),
+           "Paragraph does not have class class4.");
+    });
+
+
+    test("Test addClass", function () {
+        var node = mjp(".class1");
+
+        ok(!node.hasClass("class4"), "Does not have class4 yet");
+        node.addClass("class4");
+        ok(node.hasClass("class4"), "It has class4 now.");
+    });
+
+
+    test("Test removeClass", function () {
+        var node = mjp(".class1");
+
+        ok(node.hasClass("class2"), "Has class2");
+        node.removeClass("class2");
+        ok(!node.hasClass("class2"), "Does not have class2 anymore.");
+    });
+});
+        </script>
+    </body>
+</html>
