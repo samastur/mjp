@@ -52,7 +52,7 @@ require(['../src/core'], function (mjp) {
     test("Test creating new HTML node", function () {
         var rslts = mjp("<div></div>"),
             div = [document.createElement("div")];
-        deepEqual(rslts, div, "mjp created a div element.");
+        ok(rslts[0].tagName === "DIV", "Created object is a DIV element.");
         ok(rslts.each !== undefined, "Result set is a mjp object.");
     });
 
