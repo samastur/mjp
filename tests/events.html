@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>QUnit Events Tests</title>
+        <link rel="stylesheet" href="lib/qunit-1.12.0.css">
+    </head>
+    <body>
+        <div id="qunit"></div>
+        <div id="qunit-fixture">
+            <input type="button" id="button1" value="1" />
+            <input type="button" id="button2" value="2" />
+        </div>
+        <script src="lib/qunit-1.12.0.js"></script>
+        <script src="../node_modules/requirejs/require.js"></script>
+        <script>
+require(['../src/events'], function (mjp) {
+    var ctx = document.getElementById("qunit-fixture"),
+        value = 0;
+
+    function handler(e) {
+        value = this.value;
+    }
+
+    function attach_and_test_handlers() {
+        mjp("input", ctx).on("click", handler);
+        mjp("#button1")[0].click();
+
+        ok(value == 1, "Handler was triggered.");
+
+        value = 0;
+    }
+
+    test("Test that attached handler gets triggered", function () {
+        attach_and_test_handlers();
+    });
+
+    test("Test that attached handler was removed", function () {
+        attach_and_test_handlers();
+
+        mjp("input", ctx).off("click", handler);
+        mjp("#button1")[0].click();
+        ok(value == 0, "Handler wasn't triggered.");
+    });
+
+    test("Test that trigger method works", function () {
+        mjp("input", ctx).on("click", handler);
+        mjp("#button2").trigger("click");
+
+        ok(value == 2, "Handler was triggered.");
+    });
+});
+        </script>
+    </body>
+</html>
