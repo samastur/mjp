@@ -107,6 +107,174 @@ require(['../src/deferred'], function ($) {
     });
 
 
+    // DONE handlers
+    test("Test attaching done handler", function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.done(function () { rslt.push('done'); });
+        deferred.resolve();
+        deepEqual(rslt, ['done'], "Successfully executed attached handler.");
+    });
+
+    test("Test attaching array of done handlers", function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.done([
+            function () { rslt.push('done'); },
+            function () { rslt.push('done2'); }
+        ]);
+        deferred.resolve();
+        deepEqual(rslt, ['done', 'done2'],
+            "Successfully executed attached handlers.");
+    });
+
+    test("Test attaching combination of functions and array of functions - done",
+        function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.done(
+            function () { rslt.push('solo'); },
+        [
+            function () { rslt.push('done'); },
+            function () { rslt.push('done2'); }
+        ]);
+        deferred.resolve();
+        deepEqual(rslt, ['solo', 'done', 'done2'],
+            "Successfully executed attached handlers.");
+    });
+
+    test("Test attaching combination of functions to resolved",
+        function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.resolve();
+        deferred.done(
+            function () { rslt.push('solo'); },
+        [
+            function () { rslt.push('done'); },
+            function () { rslt.push('done2'); }
+        ]);
+        deepEqual(rslt, ['solo', 'done', 'done2'],
+            "Successfully executed attached handlers.");
+    });
+
+
+    // FAIL handlers
+    test("Test attaching fail handler", function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.fail(function () { rslt.push('fail'); });
+        deferred.reject();
+        deepEqual(rslt, ['fail'], "Successfully executed attached handler.");
+    });
+
+    test("Test attaching array of fail handlers", function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.fail([
+            function () { rslt.push('fail'); },
+            function () { rslt.push('fail2'); }
+        ]);
+        deferred.reject();
+        deepEqual(rslt, ['fail', 'fail2'],
+            "Successfully executed attached handlers.");
+    });
+
+    test("Test attaching combination of functions and array of functions - fail",
+        function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.fail(
+            function () { rslt.push('solo'); },
+        [
+            function () { rslt.push('fail'); },
+            function () { rslt.push('fail2'); }
+        ]);
+        deferred.reject();
+        deepEqual(rslt, ['solo', 'fail', 'fail2'],
+            "Successfully executed attached handlers.");
+    });
+
+    test("Test attaching combination of functions to rejected",
+        function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.reject();
+        deferred.fail(
+            function () { rslt.push('solo'); },
+        [
+            function () { rslt.push('fail'); },
+            function () { rslt.push('fail2'); }
+        ]);
+        deepEqual(rslt, ['solo', 'fail', 'fail2'],
+            "Successfully executed attached handlers.");
+    });
+
+
+    // PROGRESS handlers
+    test("Test attaching progress handler", function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.progress(function () { rslt.push('progress'); });
+        deferred.notify();
+        deepEqual(rslt, ['progress'], "Successfully executed attached handler.");
+    });
+
+    test("Test attaching array of progress handlers", function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.progress([
+            function () { rslt.push('progress'); },
+            function () { rslt.push('progress2'); }
+        ]);
+        deferred.notify();
+        deepEqual(rslt, ['progress', 'progress2'],
+            "Successfully executed attached handlers.");
+    });
+
+    test("Test attaching combination of functions and array of functions - progress",
+        function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.progress(
+            function () { rslt.push('solo'); },
+        [
+            function () { rslt.push('progress'); },
+            function () { rslt.push('progress2'); }
+        ]);
+        deferred.notify();
+        deepEqual(rslt, ['solo', 'progress', 'progress2'],
+            "Successfully executed attached handlers.");
+    });
+
+    test("Test attaching combination of functions to progress",
+        function () {
+        var rslt = [],
+            deferred = new $.Deferred();
+
+        deferred.notify();
+        deferred.progress(
+            function () { rslt.push('solo'); },
+        [
+            function () { rslt.push('progress'); },
+            function () { rslt.push('progress2'); }
+        ]);
+        deepEqual(rslt, ['solo', 'progress', 'progress2'],
+            "Successfully executed attached handlers.");
+    });
+
+
 
     // MODULE: Filters
     module("Test filters");

@@ -15,7 +15,7 @@ define([
                 if (has_context) {
                     args = [].slice.call(args, 1);
                 }
-                if (type !== "pending") { // done or fail
+                if (states[type] !== "pending") { // done or fail
                     this.d_state = states[type];
                 }
                 // First filter
@@ -31,20 +31,25 @@ define([
     }
 
     function createAttacher(type) {
+        var states = {
+            done: "resolved",
+            fail: "rejected",
+            progress: "pending"
+        };
         return function () {
             var funcs = [],
-                c = this.callbacks[type];
+                self = this;
             // Flatten arguments first into a list of functions
             mjp(arguments).each(function (i, func) {
                 funcs = funcs.concat(func); // Handles arrays and functions
             });
 
-            if (this.d_state === type) {
+            if (this.d_state === states[type]) {
                 mjp(funcs).each(function (i, func) {
-                    func.apply(this, this.value);
+                    func.apply(self, self.value);
                 });
             } else {
-                c = c.concat(funcs);
+                this.callbacks[type] = this.callbacks[type].concat(funcs);
             }
             return this;
         };
