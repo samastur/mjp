@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>QUnit Deferred Tests</title>
+        <link rel="stylesheet" href="lib/qunit-1.12.0.css">
+    </head>
+    <body>
+        <div id="qunit"></div>
+        <div id="qunit-fixture"></div>
+        <script src="lib/qunit-1.12.0.js"></script>
+        <script src="../node_modules/requirejs/require.js"></script>
+        <script>
+require(['../src/deferred'], function ($) {
+    // MODULE: Deferred
+    module("Test Deferred object");
+
+    test("Test Deferred can be initialized without beforeStart function",
+    function (){
+        var deferred = $.Deferred();
+        ok(true, "Initialized without raising an exception");
+    });
+
+    test("Test Deferred runs beforeStart", function () {
+        var rslt = 0,
+            deferred = new $.Deferred(function () { rslt = 1; });
+        ok(rslt === 1, "beforeStart function ran successfully.")
+    });
+
+
+    // MODULE: Responders
+    module("Test state responders");
+
+    test("Test notify notifier", function () {
+        var rslt = 0,
+            deferred = new $.Deferred();
+
+        deferred.callbacks['progress'] = [function (value) {rslt = value;}];
+        ok(deferred.d_state === "pending", "State is pending");
+
+        deferred.notify(5);
+        ok(rslt === 5, ".pending works");
+        ok(deferred.d_state === "pending", "State still pending");
+    });
+
+    test("Test notifyWith", function () {
+        var rslt = {},
+            deferred = new $.Deferred();
+
+        deferred.callbacks['progress'] = [function (value) {this.value = value;}];
+
+        deferred.notifyWith(rslt, 5);
+        ok(rslt.value === 5, ".notifyWith works");
+    });
+
+    test("Test resolve notifier", function () {
+        var rslt = 0,
+            deferred = new $.Deferred();
+
+        deferred.callbacks['done'] = [function (value) {rslt = value;}];
+        ok(deferred.d_state === "pending", "State is pending");
+
+        deferred.resolve(3);
+        ok(rslt === 3, ".resolve works");
+        ok(deferred.d_state === "resolved", "State changed to resolved");
+
+        deferred.notify(4);
+        ok(deferred.d_state === "resolved", "State still resolved");
+        ok(rslt === 3, "Callback wasn't called after resolve.");
+
+    });
+
+    test("Test resolveWith", function () {
+        var rslt = {},
+            deferred = new $.Deferred();
+
+        deferred.callbacks['done'] = [function (value) {this.value = value;}];
+
+        deferred.resolveWith(rslt, 5);
+        ok(rslt.value === 5, ".resolveWith works");
+    });
+
+    test("Test reject notifier", function () {
+        var rslt = 0,
+            deferred = new $.Deferred();
+
+        deferred.callbacks['fail'] = [function (value) {rslt = value;}];
+        ok(deferred.d_state === "pending", "State is pending");
+
+        deferred.reject(4);
+        ok(rslt === 4, ".reject works");
+        ok(deferred.d_state === "rejected", "State changed to rejected");
+
+        deferred.resolve(5);
+        ok(deferred.d_state === "rejected", "State still rejected");
+        ok(rslt === 4, "Callback wasn't called after reject.");
+    });
+
+    test("Test rejectWith", function () {
+        var rslt = {},
+            deferred = new $.Deferred();
+
+        deferred.callbacks['fail'] = [function (value) {this.value = value;}];
+
+        deferred.rejectWith(rslt, 5);
+        ok(rslt.value === 5, ".rejectWith works");
+    });
+
+
+
+    // MODULE: Filters
+    module("Test filters");
+
+
+    // MODULE: Misc (chaining, .promise...)
+    module("Test misc");
+
+    test("Test .state()", function () {
+        var deferred = new $.Deferred();
+        ok(deferred.state() === "pending", "Pending works");
+
+        deferred.resolve();
+        ok(deferred.state() === "resolved", "Resolved works");
+
+        deferred = new $.Deferred();
+        deferred.reject();
+        ok(deferred.state() === "rejected", "Rejected works");
+    });
+});
+        </script>
+    </body>
+</html>

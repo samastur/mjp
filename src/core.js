@@ -79,7 +79,7 @@ define(function () {
                     raw_nodes = root.querySelectorAll(sel);
                 }
             } else if (sel_type === "object") {
-                if (sel.length) {
+                if (sel.length !== undefined) {
                     if (Array.isArray(sel)) {
                         nodes = sel;
                     } else {
