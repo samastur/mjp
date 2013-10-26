@@ -84,9 +84,12 @@ define([
 
     mjp.Deferred.prototype.promise = function (target) {
         var methods = ["then", "done", "fail", "always", "progress", "state"],
-            promise = target || {};
+            promise = target || {},
+            self = this;
         mjp(methods).each(function (i, name) {
-            promise[name] = mjp.Deferred.prototype[name];
+            promise[name] = function () {
+                return mjp.Deferred.prototype[name].apply(self, arguments);
+            };
         });
         return promise;
     };
@@ -126,8 +129,8 @@ define([
     mjp.Deferred.prototype.fail = createAttacher("fail");
     mjp.Deferred.prototype.progress = createAttacher("progress");
     mjp.Deferred.prototype.always = function () {
-        this.done(arguments);
-        this.fail(arguments);
+        return this.done.apply(this, arguments)
+                   .fail.apply(this, arguments);
     };
 
     return mjp;

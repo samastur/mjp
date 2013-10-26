@@ -276,7 +276,7 @@ require(['../src/deferred'], function ($) {
 
 
 
-    // MODULE: Filters
+    // MODULE: Filters (.then)
     module("Test filters");
 
     test("Test done filter", function () {
@@ -291,6 +291,22 @@ require(['../src/deferred'], function ($) {
         ok(defer.value === 11, "Done filter works.");
     });
 
+    test("Test done filters", function () {
+        var defer = $.Deferred(),
+            filtered = defer.then([
+            function( value ) {
+                return value * 2;
+            },
+            function( value ) {
+                return value * 3;
+            }]),
+            rslt = 0;
+
+        defer.resolve(5);
+        filtered.done(function (value) { this.value = value + 1; });
+        ok(defer.value === 31, "Done filters work.");
+    });
+
     test("Test progress filter", function () {
         var defer = $.Deferred(),
             filtered = defer.then(null, null, function( value ) {
@@ -303,6 +319,22 @@ require(['../src/deferred'], function ($) {
         ok(defer.value === 9, "Progress filter works.");
     });
 
+    test("Test progress filters", function () {
+        var defer = $.Deferred(),
+            filtered = defer.then(null, null, [
+            function( value ) {
+                return value * 2;
+            },
+            function( value ) {
+                return value * 4;
+            }]),
+            rslt = 0;
+
+        defer.notify(2);
+        filtered.progress(function (value) { this.value = value + 1; });
+        ok(defer.value === 17, "Progress filters work.");
+    });
+
     test("Test fail filter", function () {
         var defer = $.Deferred(),
             filtered = defer.then(null, function( value ) {
@@ -313,6 +345,22 @@ require(['../src/deferred'], function ($) {
         defer.reject(6);
         filtered.fail(function (value) { this.value = value + 1; });
         ok(defer.value === 13, "Fail filter works.");
+    });
+
+    test("Test fail filters", function () {
+        var defer = $.Deferred(),
+            filtered = defer.then(null, [
+            function( value ) {
+                return value * 2;
+            },
+            function( value ) {
+                return value * 5;
+            }]),
+            rslt = 0;
+
+        defer.reject(3);
+        filtered.fail(function (value) { this.value = value + 1; });
+        ok(defer.value === 31, "Fail filters work.");
     });
 
 
@@ -330,6 +378,51 @@ require(['../src/deferred'], function ($) {
         deferred.reject();
         ok(deferred.state() === "rejected", "Rejected works");
     });
+
+    // Test .promise
+    test("Test fetching promise", function () {
+        var deferred = new $.Deferred(),
+            promise = deferred.promise();
+
+        promise.done(function (value) { this.value = value + 1; });
+        ok(!promise.resolve && !promise.reject && !promise.notify,
+           "Promise does not have a notifier");
+        deferred.resolve(7);
+        ok(deferred.value === 8, "Promise scope works correctly.");
+    });
+
+    test("Test creating promise on target", function () {
+        var deferred = new $.Deferred(),
+            promise = { fake: 'Test' },
+            rslt;
+        rslt = deferred.promise(promise);
+
+        equal(rslt, promise, "It's the same object");
+        ok(rslt.done && rslt.fail && rslt.progress && rslt.always && rslt.state,
+            "Has required methods");
+    });
+
+    // Test .always
+    test("Test .always on done", function () {
+        var deferred = new $.Deferred();
+
+        deferred.always(function (value) { this.value = value - 3; });
+        deferred.resolve(4);
+        ok(deferred.value === 1, ".always called on resolve");
+    });
+
+    test("Test .always on fail", function () {
+        var deferred = new $.Deferred();
+
+        deferred.always(function (value) { this.value = value - 3; });
+        deferred.reject(3);
+        ok(deferred.value === 0, ".always called on reject");
+    });
+
+    // Test .when
+
+
+    // Test chaining
 });
         </script>
     </body>
