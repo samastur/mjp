@@ -19,11 +19,13 @@ define([
                     this.d_state = states[type];
                 }
                 // First filter
+                args = args.length ? args[0]: args;
                 mjp(this.filters[type]).each(function (i, func) {
-                    args = func.apply(ctx, args);
+                    args = func.call(ctx, args);
                 });
+                this.value = args;
                 mjp(this.callbacks[type]).each(function (i, func) {
-                    self.value = func.apply(ctx, args) || self.value;
+                    self.value = func.call(ctx, self.value) || self.value;
                 });
             }
             return this;
@@ -46,7 +48,7 @@ define([
 
             if (this.d_state === states[type]) {
                 mjp(funcs).each(function (i, func) {
-                    func.apply(self, self.value);
+                    func.call(self, self.value);
                 });
             } else {
                 this.callbacks[type] = this.callbacks[type].concat(funcs);
@@ -56,6 +58,11 @@ define([
     }
 
     mjp.Deferred = function (beforeStart) {
+        // Handle cases when user forgot to initiate with "new"
+        if (!(this instanceof(mjp.Deferred))) {
+            return new mjp.Deferred(beforeStart);
+        }
+
         this.d_state = "pending";
         this.callbacks = {
             done: [],
@@ -100,9 +107,9 @@ define([
 
     mjp.Deferred.prototype.then = function (doneFilter, failFilter, progressFilter) {
         var f = this.filters;
-        f.done = f.done.concat(doneFilter);
-        f.fail = f.fail.concat(failFilter);
-        f.progress = f.progress.concat(progressFilter);
+        if (doneFilter) { f.done = f.done.concat(doneFilter);}
+        if (failFilter) { f.fail = f.fail.concat(failFilter);}
+        if (progressFilter) { f.progress = f.progress.concat(progressFilter);}
         return this;
     };
 

@@ -279,6 +279,42 @@ require(['../src/deferred'], function ($) {
     // MODULE: Filters
     module("Test filters");
 
+    test("Test done filter", function () {
+        var defer = $.Deferred(),
+            filtered = defer.then(function( value ) {
+                return value * 2;
+            }),
+            rslt = 0;
+
+        defer.resolve(5);
+        filtered.done(function (value) { this.value = value + 1; });
+        ok(defer.value === 11, "Done filter works.");
+    });
+
+    test("Test progress filter", function () {
+        var defer = $.Deferred(),
+            filtered = defer.then(null, null, function( value ) {
+                return value * 2;
+            }),
+            rslt = 0;
+
+        defer.notify(4);
+        filtered.progress(function (value) { this.value = value + 1; });
+        ok(defer.value === 9, "Progress filter works.");
+    });
+
+    test("Test fail filter", function () {
+        var defer = $.Deferred(),
+            filtered = defer.then(null, function( value ) {
+                return value * 2;
+            }),
+            rslt = 0;
+
+        defer.reject(6);
+        filtered.fail(function (value) { this.value = value + 1; });
+        ok(defer.value === 13, "Fail filter works.");
+    });
+
 
     // MODULE: Misc (chaining, .promise...)
     module("Test misc");
