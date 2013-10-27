@@ -270,7 +270,7 @@ require(['../src/deferred'], function ($) {
             function () { rslt.push('progress'); },
             function () { rslt.push('progress2'); }
         ]);
-        deepEqual(rslt, ['solo', 'progress', 'progress2'],
+        deepEqual(rslt, [],
             "Successfully executed attached handlers.");
     });
 
@@ -316,7 +316,7 @@ require(['../src/deferred'], function ($) {
 
         defer.notify(4);
         filtered.progress(function (value) { this.value = value + 1; });
-        ok(defer.value === 9, "Progress filter works.");
+        ok(defer.value === 8, "Progress filter works.");
     });
 
     test("Test progress filters", function () {
@@ -332,7 +332,7 @@ require(['../src/deferred'], function ($) {
 
         defer.notify(2);
         filtered.progress(function (value) { this.value = value + 1; });
-        ok(defer.value === 17, "Progress filters work.");
+        ok(defer.value === 16, "Progress filters work.");
     });
 
     test("Test fail filter", function () {
@@ -394,12 +394,39 @@ require(['../src/deferred'], function ($) {
     test("Test creating promise on target", function () {
         var deferred = new $.Deferred(),
             promise = { fake: 'Test' },
-            rslt;
-        rslt = deferred.promise(promise);
+            rslt = deferred.promise(promise);
 
-        equal(rslt, promise, "It's the same object");
+        strictEqual(rslt, promise, "It's the same object");
         ok(rslt.done && rslt.fail && rslt.progress && rslt.always && rslt.state,
             "Has required methods");
+        promise.done(function (value) { promise.result = value; });
+        deferred.resolve(19);
+        ok(promise.result === 19, "Acquired methods also work.");
+    });
+
+    test("Test creating promise on an object", function () {
+        // Existing object
+        var obj = {
+                hello: function( name ) {
+                    result.push = ("Hello " + name);
+                }
+            },
+            // Create a Deferred
+            defer = $.Deferred(),
+            result = [];
+
+        // Set object as a promise
+        defer.promise( obj );
+
+        // Resolve the deferred
+        defer.resolve( "John" );
+
+        // Use the object as a Promise
+        obj.done(function( name ) {
+            obj.hello( name ); // Will add "Hello John"
+        }).hello( "Karl" ); // Will add "Hello Karl"
+
+        ok(result, ["Hello John", "Hello Karl"], "Promise on object works");
     });
 
     // Test .always
@@ -420,9 +447,43 @@ require(['../src/deferred'], function ($) {
     });
 
     // Test .when
+    test("Test .when works on A deferred", function () {
+        var deferred = new $.Deferred(),
+            result = 0;
 
+        $.when(deferred).done(function (value) { result = value; });
+        deferred.resolve(18);
+        ok(result === 18, "It works.");
+    });
+
+    test("Test .when works on plain objects", function () {
+        var result = 0;
+        $.when( { testing: 123 } ).done(function( x ) {
+            result = x.testing; // Returns "123"
+        });
+        ok(result === 123, "It works.");
+    });
 
     // Test chaining
+    test("Test chaining of methods", function () {
+        function createChain() {
+            var deferred = $.Deferred();
+
+            return deferred.done(function (value) { result = value + 1;})
+                           .fail(function (value) { result = value + 2;})
+                           .progress(function (value) { result = value + 3;});
+        }
+
+        var d = createChain(),
+            result = 0;
+
+        d.notify(4);
+        ok(result === 7, "Progress ran");
+        d.resolve(3);
+        ok(result === 4, "Done ran");
+        d.reject(5);
+        ok(result === 4, "Fail didn't run");
+    });
 });
         </script>
     </body>

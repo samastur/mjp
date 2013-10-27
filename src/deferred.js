@@ -46,7 +46,7 @@ define([
                 funcs = funcs.concat(func); // Handles arrays and functions
             });
 
-            if (this.d_state === states[type]) {
+            if (this.d_state === states[type] && type !== "progress") {
                 mjp(funcs).each(function (i, func) {
                     func.call(self, self.value);
                 });
@@ -88,13 +88,14 @@ define([
             self = this;
         mjp(methods).each(function (i, name) {
             promise[name] = function () {
-                return mjp.Deferred.prototype[name].apply(self, arguments);
+                mjp.Deferred.prototype[name].apply(self, arguments);
+                return promise;
             };
         });
         return promise;
     };
 
-    mjp.Deferred.prototype.when = function (deferred) {
+    mjp.when = function (deferred) {
         if (deferred.promise) {
             return deferred.promise();
         } else if (!(deferred.done && deferred.fail && !deferred.notify)) {
