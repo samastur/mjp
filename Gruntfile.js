@@ -29,7 +29,8 @@ module.exports = function( grunt ) {
                 dest: "dist/mjp.js",
                 minimum: [
                     "core"
-                ]
+                ],
+                removeWith: {}
             }
         },
         jshint: {
@@ -98,7 +99,7 @@ module.exports = function( grunt ) {
             }
         },
         qunit: {
-            all: ["tests/**/*.html"]
+            all: ["tests/*.html"]
         }
     });
 
@@ -108,6 +109,7 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( "grunt-contrib-watch" );
     grunt.loadNpmTasks( "grunt-contrib-uglify" );
     grunt.loadNpmTasks( "grunt-contrib-qunit" );
+    grunt.loadNpmTasks( "grunt-contrib-connect" );
 
     // Load custom tasks
     grunt.loadTasks( "build/tasks" );
