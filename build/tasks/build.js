@@ -1,6 +1,5 @@
 /**
- * Special concat/build task copied from jQuery because they know what they
- * are doing and I don't.
+ * Special concat/build task copied from jQuery because they know what they are doing and I don't.
  * Concats AMD modules, removes their definitions, and includes/excludes specified modules
  */
 
@@ -79,7 +78,7 @@ module.exports = function( grunt ) {
         "build",
         "Concatenate source, remove sub AMD definitions, (include/exclude modules with +/- flags), embed date/version",
     function() {
-        var flag, index,
+        var flag,
             done = this.async(),
             flags = this.flags,
             optIn = flags[ "*" ],
@@ -149,15 +148,12 @@ module.exports = function( grunt ) {
                         excludeList( removeWith[ module ] );
                     } else {
                         grunt.log.error( "Module \"" + module + "\" is a mimimum requirement.");
-                        if ( module === "selector" ) {
-                            grunt.log.error( "If you meant to replace Sizzle, use -sizzle instead." );
-                        }
                     }
-                    } else {
-                        grunt.log.writeln( flag );
-                        included.push( module );
-                    }
-                };
+                } else {
+                    grunt.log.writeln( flag );
+                    included.push( module );
+                }
+            };
 
             // append commit id to version
             if ( process.env.COMMIT ) {
@@ -179,13 +175,6 @@ module.exports = function( grunt ) {
             delete flags[ "*" ];
             for ( flag in flags ) {
                 excluder( flag );
-            }
-
-            // Handle Sizzle exclusion
-            // Replace with selector-native
-            if ( (index = excluded.indexOf( "sizzle" )) > -1 ) {
-                config.rawText.selector = "define(['./selector-native']);";
-                excluded.splice( index, 1 );
             }
 
             grunt.verbose.writeflags( excluded, "Excluded" );
@@ -237,11 +226,11 @@ module.exports = function( grunt ) {
         // Special "alias" task to make custom build creation less grawlix-y
         // Translation example
         //
-        //   grunt custom:+ajax,-dimensions,-effects,-offset
+        //   grunt custom:+classes,-events,-deferred
         //
         // Becomes:
         //
-        //   grunt build:*:*:+ajax:-dimensions:-effects:-offset
+        //   grunt build:*:*:+classes:-events:-deferred
         grunt.registerTask( "custom", function() {
             var args = [].slice.call( arguments ),
                 modules = args.length ? args[ 0 ].replace( /,/g, ":" ) : "";
