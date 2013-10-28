@@ -10,7 +10,7 @@ define([
         return function () {
             var args = arguments,
                 ctx = has_context ? args[0] : this,
-                self = this;
+                self = this, value;
             if (this.d_state === "pending") { // Not yet resolved/rejected
                 if (has_context) {
                     args = [].slice.call(args, 1);
@@ -19,13 +19,18 @@ define([
                     this.d_state = states[type];
                 }
                 // First filter
-                args = args.length ? args[0]: args;
-                mjp(this.filters[type]).each(function (i, func) {
-                    args = func.call(ctx, args);
-                });
-                this.value = args;
+                if (this.filters[type].length) {
+                    value = [].slice.call(args, 0); // Work on a copy
+                    mjp(this.filters[type]).each(function (i, func) {
+                        value = func.apply(ctx, typeof value === "object" && value.length !== "undefined" ? value: [value]);
+                    });
+                    this.value = value;
+                } else {
+                    this.value = args.length === 1 ? args[0]: args; // Dubious
+                }
+                // Then call callbacks
                 mjp(this.callbacks[type]).each(function (i, func) {
-                    self.value = func.call(ctx, self.value) || self.value;
+                    func.apply(ctx, args || [self.value]);
                 });
             }
             return this;
@@ -74,7 +79,6 @@ define([
             fail: [],
             progress: []
         };
-        this.value;
 
         beforeStart && beforeStart();
         return this;
@@ -88,15 +92,52 @@ define([
             self = this;
         mjp(methods).each(function (i, name) {
             promise[name] = function () {
-                mjp.Deferred.prototype[name].apply(self, arguments);
-                return promise;
+                var value = mjp.Deferred.prototype[name].apply(self, arguments);
+                return name === "state" ?  value : promise;
             };
         });
         return promise;
     };
 
+    function trackDeferreds(/*deferred1, deferred2...deferredN */) {
+        /* Create master deferred that tracks state of multiple deferreds.
+           Reject master if any of passed-in rejects (when it does).
+           Otherwise resolve master when all the passed in resolve.
+
+           When resolved, it is passed values of all deferreds in the same
+           order in which they were added.
+         */
+        function resolve() {
+
+            no_resolved += 1;
+            if (no_resolved === no_defs) {
+                mjp(defs).each(function (i, def) { values.push(def.value); });
+                deferred.value = values;
+                deferred.resolve.apply(deferred, values);
+                //deferred.resolve();
+            }
+        }
+
+        function reject() {
+            deferred.reject();
+        }
+
+        var deferred = new mjp.Deferred(),
+            defs = arguments,
+            no_defs = arguments.length,
+            no_resolved = 0,
+            values = [];
+        mjp(arguments).each(function (i, d) {
+            d.done(resolve).fail(reject);
+        });
+
+        return deferred;
+    }
+
     mjp.when = function (deferred) {
-        if (deferred.promise) {
+        if (arguments.length > 2) { // Multiple deferreds
+            return trackDeferreds.apply(this, arguments);
+        } else if (deferred.promise) {
             return deferred.promise();
         } else if (!(deferred.done && deferred.fail && !deferred.notify)) {
             // Create object that behaves like a resolved promise

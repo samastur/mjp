@@ -287,8 +287,8 @@ require(['../src/deferred'], function ($) {
             rslt = 0;
 
         defer.resolve(5);
-        filtered.done(function (value) { this.value = value + 1; });
-        ok(defer.value === 11, "Done filter works.");
+        filtered.done(function (value) { rslt = value + 1; });
+        ok(rslt === 11, "Done filter works.");
     });
 
     test("Test done filters", function () {
@@ -464,6 +464,38 @@ require(['../src/deferred'], function ($) {
         ok(result === 123, "It works.");
     });
 
+    test("Test .when works with multiple deferreds", function () {
+        var d1 = $.Deferred(),
+            d2 = $.Deferred(),
+            d3 = $.Deferred(),
+            master, result;
+
+        master = $.when(d1, d2, d3)
+                    .done(function() { result = arguments; })
+                    .fail(function() { result = 'fail'; });
+        d2.reject();
+        ok(master.state() === "rejected", "State is correct");
+        ok(result === "fail", "Fail handler executed");
+
+        result = [];
+        d1 = $.Deferred();
+        d2 = $.Deferred();
+        d3 = $.Deferred();
+        master = $.when(d1, d2, d3)
+                    .done(function(v1, v2, v3) { result = [v1, v2, v3]; })
+                    .fail(function() { result = 'fail'; });
+        ok(master.state() === "pending", "State is pending");
+        d1.resolve("first");
+        ok(master.state() === "pending", "State is still pending");
+        deepEqual(result, [], "Result is unchanged");
+        d3.resolve("third");
+        ok(master.state() === "pending", "State is still pending");
+        deepEqual(result, [], "Result is unchanged");
+        d2.resolve("second");
+        ok(master.state() === "resolved", "State is resolved");
+        deepEqual(result, ["first", "second", "third"], "Result changed");
+    });
+
     // Test chaining
     test("Test chaining of methods", function () {
         function createChain() {
@@ -483,6 +515,14 @@ require(['../src/deferred'], function ($) {
         ok(result === 4, "Done ran");
         d.reject(5);
         ok(result === 4, "Fail didn't run");
+
+        d = createChain();
+        d.notify(3);
+        ok(result === 6, "Progress ran");
+        d.reject(9);
+        ok(result === 11, "Fail ran");
+        d.resolve(5);
+        ok(result === 11, "Done didn't run");
     });
 });
         </script>
