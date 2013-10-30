@@ -55,6 +55,22 @@ define(function () {
     var fn = {
             each: _forEach,
 
+            map: function (callback) {
+                var mapped = [];
+                this.each(function (i, el) {
+                    mapped = mapped.concat(callback(i, el));
+                });
+                return mjp(mapped);
+            },
+
+            filter: function (callback) {
+                var filtered = [];
+                this.each(function (i, el) {
+                    callback(i, el) && filtered.push(el);
+                });
+                return mjp(filtered);
+            },
+
             html: function (value) {
                 if (value) {
                     this.each(function (i, el) {
