@@ -75,6 +75,14 @@ define(function () {
             if (sel_type === "string") {
                 if (sel.slice(0, 1) === "<") {
                     raw_nodes = [innerHTML(sel)];
+                } else if (sel.indexOf(",") > -1) { // Multiple selectors
+                    // TODO: write test
+                    sel = sel.split(",");
+                    for(var i=0;i<sel.length;i++) {
+                        // .slice.call() makes an array that can be concatenated
+                        nodes = nodes.concat([].slice.call(
+                                    root.querySelectorAll(trim(sel[i]))));
+                    }
                 } else {
                     raw_nodes = root.querySelectorAll(sel);
                 }

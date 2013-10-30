@@ -42,6 +42,10 @@ require(['../src/core'], function (mjp) {
         ok(rslts.each !== undefined, "Result set is a mjp object.");
     });
 
+    test("Test matching multiple selectors", function () {
+        ok(mjp("p, li", ctx).length === 6, "Matched a P and 5 LI's");
+    });
+
     test("Test wrapping node in an array", function () {
         var p = document.getElementById("paragraph"),
             rslts = mjp(p, ctx);
