@@ -99,7 +99,23 @@ module.exports = function( grunt ) {
             }
         },
         qunit: {
-            all: ["tests/*.html"]
+            all: [
+                "tests/core.html",
+                "tests/classes.html",
+                "tests/events.html",
+                "tests/deferred.html"
+            ],
+            options: {
+                urls: ["http://localhost:9000/tests/ajax.html"]
+            }
+        },
+        connect: {
+            server: {
+                options: {
+                    port: 9000,
+                    base: "."
+                }
+            }
         }
     });
 
@@ -118,7 +134,7 @@ module.exports = function( grunt ) {
     grunt.registerTask( "dev", [ "build:*:*", "jshint" ] );
 
     // Test
-    grunt.registerTask( "test", [ "jshint", "qunit" ] );
+    grunt.registerTask( "test", [ "jshint", "connect", "qunit" ] );
 
     // Default grunt
     grunt.registerTask( "default", [ "dev", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );

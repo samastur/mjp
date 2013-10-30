@@ -2,7 +2,8 @@ define([
     "./core",
     "./classes",
     "./events",
-    "./deferred"
+    "./deferred",
+    "./ajax"
 ], function (mjp) {
     return (window.mjp = window.$ = mjp);
 });
