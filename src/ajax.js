@@ -187,15 +187,17 @@ define([
                 rsubmittable = /^(?:input|select|textarea|keygen)/i;
 
             return this.map(function(i, el) {
+                // If passed form element, then fetch its elements (form fields)
                 return el.elements ? [].slice.call(el.elements) : this;
             })
+            // Filter out disabled, unchecked and unselected
             .filter(function(i, el) {
-                // Filter out disabled, unchecked and unselected
                 return el.name && !el.disabled &&
                     rsubmittable.test( el.nodeName ) &&
                     !rsubmitterTypes.test( el.type ) &&
                     ( el.checked || !rcheckableType.test( el.type ) );
             })
+            // Grab values of the rest
             .map(function( i, elem ) {
                 var val = elem.value;
 
