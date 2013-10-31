@@ -48,7 +48,99 @@ define([
             // url
             // xhr
             xhrFields: {}
-        },
+        }
+    });
+    //cors = ("withCredentials" in getXHR() || XDomainRequest);
+
+    mjp.ajaxSetup = function(options) {
+        mjp.extend(mjp.ajaxSettings, options);
+    };
+
+    mjp.ajax = function (url, settings) {
+        var opts = {},
+            deferred = mjp.Deferred(),
+            xhr,
+            data;
+
+        if (!url) { settings = url; }
+
+        opts = mjp.extend(opts, mjp.ajaxSettings, settings);
+
+        opts.success && deferred.done(opts.success);
+        opts.error && deferred.fail(opts.error);
+        opts.complete && deferred.always(opts.complete);
+
+        // Build XHR and execute it
+        xhr = opts.xhr || (new XMLHttpRequest());
+        xhr.onreadystatechange = function () {
+            var data;
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    data = xhr.responseText;
+                    try {
+                        switch (opts.dataType) {
+                            case "json":
+                                data = JSON.parse(data);
+                                break;
+                            default:
+                        }
+                        deferred.resolve(data, xhr.statusText, xhr);
+                    } catch(e) {
+                        deferred.reject(xhr, "parsererror");
+                    }
+                } else { // Failed
+                    deferred.reject(xhr, "error");
+                }
+            }
+        };
+        data = opts.data || null;
+        if (data) {
+            if (typeof data !== "string") {
+                data = mjp.param(data, opts.traditional);
+            }
+            // Attach to URL if GET or HEAD, otherwise add to send
+            if (/^(?:GET|HEAD)$/.test(opts.type)) {
+                url += (/\?/.type(url) ? "&" : "?") + data;
+                data = null;
+            } else {
+                // Set headers
+                xhr.setRequestHeader("Content-Type", opts.contentType);
+            }
+        }
+
+        if (opts.timeout) {
+            setTimeout(function () {
+                if (deferred.state() === "pending") {
+                    xhr.abort();
+                    deferred.reject(xhr, "timeout");
+                }
+            }, opts.timeout);
+        }
+        xhr.open(opts.type, url, opts.async, opts.username, opts.password);
+        xhr.send(data);  // data can be null which is fine
+
+        return deferred.promise(xhr);
+    };
+
+    // Call methods .get, .getJSON and .post
+    function createCall(settings) {
+        return function (url, data, success, dataType) {
+            var opts = {
+                data: data,
+                url: url,
+                success: success,
+                dataType: dataType
+            };
+            return mjp.ajax(mjp.extend(opts, settings));
+        };
+    }
+
+    // Attach methods that go on mjp itself
+    mjp.extend(mjp, {
+        get: createCall({}),
+        getJSON: createCall({dataType: "json"}),
+        post: createCall({type: "POST"}),
+        getScript: createCall({dataType: "script"}),
 
         // Helpers
         param : function (obj, traditional) { // Borrowed from jQuery
@@ -83,82 +175,6 @@ define([
             return s.join( "&" ).replace( /%20/g, "+" );
         }
     });
-    //cors = ("withCredentials" in getXHR() || XDomainRequest);
-
-    mjp.ajaxSetup = function(options) {
-        mjp.extend(mjp.ajaxSettings, options);
-    };
-
-    mjp.ajax = function (url, settings) {
-        var opts = {},
-            deferred = mjp.Deferred(),
-            xhr;
-
-        if (!url) { settings = url; }
-
-        opts = mjp.extend(opts, mjp.ajaxSettings, settings);
-
-        opts.success && deferred.done(opts.success);
-        opts.error && deferred.fail(opts.error);
-        opts.complete && deferred.always(opts.complete);
-
-        // Build XHR and execute it
-        xhr = opts.xhr || (new XMLHttpRequest());
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    try {
-                        deferred.resolve(
-                            JSON.parse(xhr.responseText), xhr.statusText, xhr
-                        );
-                    } catch(e) {
-                        deferred.reject(xhr, "parsererror");
-                    }
-                } else { // Failed
-                    deferred.reject(xhr, "error");
-                }
-            }
-        };
-        xhr.open(opts.type, url, opts.async, opts.username, opts.password);
-
-        if (opts.timeout) {
-            setTimeout(function () {
-                if (deferred.state() === "pending") {
-                    xhr.abort();
-                    deferred.reject(xhr, "timeout");
-                }
-            }, opts.timeout);
-        }
-        xhr.send(opts.data || null);
-
-        return deferred.promise(xhr);
-    };
-
-    mjp.get = function (url, data, success, dataType) {
-        return mjp.ajax(url, {
-            data: data,
-            url: url,
-            success: success,
-            dataType: dataType
-        });
-    };
-
-    // Call methods .get, .getJSON and .post
-    function createCall(settings) {
-        return function (url, data, success, dataType) {
-            var opts = {
-                data: data,
-                url: url,
-                success: success,
-                dataType: dataType
-            };
-            return mjp.ajax(mjp.extend(opts, settings));
-        };
-    }
-
-    mjp.get = createCall({});
-    mjp.getJSON = createCall({dataType: "json"});
-    mjp.post = createCall({type: "POST"});
 
 
     // Methods that belong on mjp objects
@@ -175,6 +191,7 @@ define([
             return self;
         },
 
+        // TODO: serialize & serializeArray add ~200 bytes to gzipped lib
         serialize: function() {
             return mjp.param( this.serializeArray() );
         },
