@@ -45,6 +45,11 @@ define(function () {
                 txt.toString().replace(trimLeft, "").replace(trimRight, "");
     }
 
+    function makeArray(obj) {
+        // .slice.call() makes an array from array-like object
+        return [].slice.call(obj);
+    }
+
     // HTML "templating"
     function innerHTML(template) {
         var div = document.createElement("div");
@@ -95,8 +100,7 @@ define(function () {
                     // TODO: write test
                     sel = sel.split(",");
                     for(var i=0;i<sel.length;i++) {
-                        // .slice.call() makes an array that can be concatenated
-                        nodes = nodes.concat([].slice.call(
+                        nodes = nodes.concat(makeArray(
                                     root.querySelectorAll(trim(sel[i]))));
                     }
                 } else {
@@ -124,9 +128,15 @@ define(function () {
             return nodes;
         };
 
-    mjp.fn = fn;
-    mjp.trim = trim;
     mjp.extend = extend;
+
+    mjp.extend(mjp, {
+        fn: fn,
+        trim: trim,
+        isFunction: function (obj) { return typeof obj === "function"; },
+        isArray: function (obj) { return Array.isArray(obj); },
+        makeArray: makeArray
+    });
 
     return mjp;
 });

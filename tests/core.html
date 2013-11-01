@@ -29,6 +29,30 @@ require(['../src/core'], function (mjp) {
            "Trimmed text is not surrounded by whitespace anymore.");
     });
 
+    test("Test isFunction matches functions", function () {
+        ok(mjp.isFunction(function (){}), "Function is indeed a function.");
+    });
+
+    test("Test isFunction doesn't match non-functions", function () {
+        ok(!mjp.isFunction(1), "Number is not a function.");
+    });
+
+    test("Test isArray matches arrays", function () {
+        ok(mjp.isArray([]), "OK");
+    });
+
+    test("Test isArray doesn't match non-arrays", function () {
+        ok(!mjp.isArray(""), "String is not an array");
+        ok(!mjp.isArray(arguments), "Function arguments are not an array");
+    });
+
+    test("Test makeArray", function () {
+        var arr;
+        ok(!mjp.isArray(arguments), "Function arguments are not an array");
+        arr = mjp.makeArray(arguments);
+        ok(mjp.isArray(arr), "Changed to an array");
+    });
+
 
     test("Test matching subset of list items", function () {
         var rslts = mjp("li.selected", ctx),
