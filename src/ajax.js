@@ -29,25 +29,27 @@ define([
     mjp.extend(mjp, {
         // Defaults
         ajaxSettings : {
-            // accepts?
             async: true,
+            // beforeSend
             cache: true,
             contentType: "application/x-www-form-urlencoded; charset=UTF-8",
             crossDomain: false,
             // data
             dataType: "json",
-            // headers
+            headers: {},
             jsonp: "callback",
             // jsonpCallback
-            // mimeType
             // password
             processData: true,
             statusCode: {},
             type: "GET",
             // username
             // url
-            // xhr
-            xhrFields: {}
+            xhr: function () {
+                try{
+                    return new XMLHttpRequest();
+                } catch(e) {}
+            }
         }
     });
     //cors = ("withCredentials" in getXHR() || XDomainRequest);
@@ -56,11 +58,57 @@ define([
         mjp.extend(mjp.ajaxSettings, options);
     };
 
+    function setHeaders(xhr, headers) {
+        var fullheaders = {"X-Requested-With": "XMLHttpRequest"};
+        mjp.extend(fullheaders, headers);
+        for(var prop in fullheaders) {
+            if (fullheaders.hasOwnProperty(prop)) {
+                xhr.setRequestHeader(prop, fullheaders[prop]);
+            }
+        }
+    }
+
+    function evalScript(code) {
+        var scr = document.createElement("script");
+        scr.text = mjp.trim(code);
+        // Add and remove it to execute it
+        document.head.appendChild(scr).parentNode.removeChild(scr);
+    }
+
+    function xhrFinished(xhr, opts, deferred) {
+        var data,
+            sCode = opts.statusCode;
+        if (xhr.status === 200) {
+            data = xhr.responseText;
+            try {
+                switch (opts.dataType) {
+                    case "json":
+                        data = JSON.parse(data);
+                        break;
+                    case "html":
+                        data = mjp(data);
+                        break;
+                    case "script":
+                        evalScript(data);
+                        break;
+                    case "xml":
+                        data = xhr.responseXML;
+                } // default handles 'text'
+                sCode[200] && sCode[200](data, xhr.statusText, xhr);
+                deferred.resolve(data, xhr.statusText, xhr);
+            } catch(e) {
+                deferred.reject(xhr, "parsererror");
+            }
+        } else { // Failed
+            sCode[xhr.status] && sCode[xhr.status](xhr, "error");
+            deferred.reject(xhr, "error");
+        }
+    }
+
     mjp.ajax = function (url, settings) {
         var opts = {},
             deferred = mjp.Deferred(),
-            xhr,
-            data;
+            xhr, data;
 
         if (!url) { settings = url; }
 
@@ -71,31 +119,15 @@ define([
         opts.complete && deferred.always(opts.complete);
 
         // Build XHR and execute it
-        xhr = opts.xhr || (new XMLHttpRequest());
+        xhr = opts.xhr() || (new XMLHttpRequest());
         xhr.onreadystatechange = function () {
-            var data;
             if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    data = xhr.responseText;
-                    try {
-                        switch (opts.dataType) {
-                            case "json":
-                                data = JSON.parse(data);
-                                break;
-                            default:
-                        }
-                        deferred.resolve(data, xhr.statusText, xhr);
-                    } catch(e) {
-                        deferred.reject(xhr, "parsererror");
-                    }
-                } else { // Failed
-                    deferred.reject(xhr, "error");
-                }
+                xhrFinished(xhr, opts, deferred);
             }
         };
         data = opts.data || null;
         if (data) {
-            if (typeof data !== "string") {
+            if (typeof data !== "string" && !opts.processData) {
                 data = mjp.param(data, opts.traditional);
             }
             // Attach to URL if GET or HEAD, otherwise add to send
@@ -104,34 +136,48 @@ define([
                 data = null;
             } else {
                 // Set headers
-                xhr.setRequestHeader("Content-Type", opts.contentType);
+                opts.headers["Content-Type"] = opts.contentType;
             }
         }
 
-        if (opts.timeout) {
-            setTimeout(function () {
-                if (deferred.state() === "pending") {
-                    xhr.abort();
-                    deferred.reject(xhr, "timeout");
-                }
-            }, opts.timeout);
-        }
-        xhr.open(opts.type, url, opts.async, opts.username, opts.password);
-        xhr.send(data);  // data can be null which is fine
+        // Override mime type for XML (just in case)
+        opts.dataType === "xml" && xhr.overrideMimeType("text/xml");
 
+        xhr.open(opts.type, url, opts.async, opts.username, opts.password);
+        setHeaders(xhr, opts.headers);
+        if (!opts.beforeSend || opts.beforeSend(xhr, opts)) {
+            if (opts.timeout) {
+                setTimeout(function () {
+                    if (deferred.state() === "pending") {
+                        xhr.abort();
+                        deferred.reject(xhr, "timeout");
+                    }
+                }, opts.timeout);
+            }
+            xhr.send(data);  // data can be null which is fine
+        } else { // Cancel the request
+            xhr.abort();
+            deferred.reject(xhr, "timeout");
+        }
         return deferred.promise(xhr);
     };
 
     // Call methods .get, .getJSON and .post
     function createCall(settings) {
-        return function (url, data, success, dataType) {
+        return function (url, data, success, type) {
+            // shift arguments when there's no data
+            if (mjp.isFunction(data)) {
+                type = type || success;
+                success = data;
+                data = undefined;
+            }
             var opts = {
                 data: data,
                 url: url,
                 success: success,
-                dataType: dataType
+                dataType: type || mjp.ajaxSettings.dataType
             };
-            return mjp.ajax(mjp.extend(opts, settings));
+            return mjp.ajax(url, mjp.extend(opts, settings));
         };
     }
 
@@ -140,7 +186,7 @@ define([
         get: createCall({}),
         getJSON: createCall({dataType: "json"}),
         post: createCall({type: "POST"}),
-        getScript: createCall({dataType: "script"}),
+        //getScript: createCall({dataType: "script"}),
 
         // Helpers
         param : function (obj, traditional) { // Borrowed from jQuery
@@ -183,10 +229,12 @@ define([
             var self = this;
             if (self.length) {
                 mjp.get(url, data, complete || function (value) {
-                    self.each(function (i, el) {
-                        mjp(el).html(value);
-                    });
-                });
+                    if (value.length) {
+                        self.each(function (i, el) {
+                            el.appendChild(value[0]);
+                        });
+                    }
+                }, "html");
             }
             return self;
         },
@@ -205,7 +253,7 @@ define([
 
             return this.map(function(i, el) {
                 // If passed form element, then fetch its elements (form fields)
-                return el.elements ? [].slice.call(el.elements) : this;
+                return el.elements ? mjp.makeArray(el.elements) : this;
             })
             // Filter out disabled, unchecked and unselected
             .filter(function(i, el) {

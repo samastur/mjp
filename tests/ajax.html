@@ -84,20 +84,15 @@ require(['../src/ajax'], function ($) {
 
 
 
-    /*
     asyncTest("Test .load", 1, function () {
         var rslt = "";
-        $("#node").load("http://localhost:9000/tests/gets/snippet.html", null, function (data) {
-            rslt = data;
-        });
-        //$("#node").load("http://localhost:9000/tests/gets/snippet.html");
+        $("#node").load("gets/snippet.html");
         setTimeout(function () {
             ok($("#node").html() === "<span>Text in a span!</span>",
-               "load() works" +  rslt + ".");
+               "load() works.");
             start();
         }, 1000);
     });
-    */
 });
         </script>
     </body>
