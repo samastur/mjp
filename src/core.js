@@ -54,7 +54,7 @@ define(function () {
     function innerHTML(template) {
         var div = document.createElement("div");
         div.innerHTML = template;
-        return div.removeChild(div.firstChild);
+        return makeArray(div.childNodes);
     }
 
     var fn = {
@@ -95,7 +95,7 @@ define(function () {
 
             if (sel_type === "string") {
                 if (sel.slice(0, 1) === "<") {
-                    raw_nodes = [innerHTML(sel)];
+                    raw_nodes = innerHTML(sel);
                 } else if (sel.indexOf(",") > -1) { // Multiple selectors
                     // TODO: write test
                     sel = sel.split(",");

@@ -84,6 +84,16 @@ require(['../src/core'], function (mjp) {
         ok(rslts.each !== undefined, "Result set is a mjp object.");
     });
 
+    test("Test creating multiple HTML nodes", function () {
+        var rslts = mjp("<p><p>"),  // <div><div> is div > div since div's can nest
+            div = [document.createElement("p"),
+                   document.createElement("p")];
+        ok(rslts.length === 2, "Created two objects.");
+        ok(rslts[0].tagName === "P", "First object is a P element.");
+        ok(rslts[1].tagName === "P", "Second object is a P element.");
+        ok(rslts.each !== undefined, "Result set is a mjp object.");
+    });
+
     test("Test mjp can read HTML on the page", function () {
         var txt = mjp("#paragraph").html();
         equal(txt, "Some text", "Text read correctly.");
