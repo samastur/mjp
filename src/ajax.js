@@ -110,7 +110,7 @@ define([
             deferred = mjp.Deferred(),
             xhr, data;
 
-        if (!url) { settings = url; }
+        if (!settings) { settings = url; }
 
         opts = mjp.extend(opts, mjp.ajaxSettings, settings);
 
@@ -145,6 +145,7 @@ define([
 
         xhr.open(opts.type, url, opts.async, opts.username, opts.password);
         setHeaders(xhr, opts.headers);
+        // End of request building
         if (!opts.beforeSend || opts.beforeSend(xhr, opts)) {
             if (opts.timeout) {
                 setTimeout(function () {

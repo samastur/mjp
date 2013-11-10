@@ -81,9 +81,6 @@ require(['../src/ajax'], function ($) {
     // AJAX
     module("Ajax calls");
 
-
-
-
     asyncTest("Test .load", 1, function () {
         var rslt = "";
         $("#node").load("gets/snippet.html");
@@ -91,7 +88,29 @@ require(['../src/ajax'], function ($) {
             ok($("#node").html() === "<span>Text in a span!</span>",
                "load() works.");
             start();
-        }, 1000);
+        }, 100);
+    });
+
+    asyncTest("Test .get", 2, function () {
+        var rslt = "";
+        setTimeout(function () {
+            $.get("gets/data.json", function (data, textStatus, jqXHR) {
+                ok(data.status === "ok", "Status is correct.");
+                deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
+            });
+            start();
+        }, 100);
+    });
+
+    asyncTest("Test .getJSON", 2, function () {
+        var rslt = "";
+        setTimeout(function () {
+            $.get("gets/data.json", function (data, textStatus, jqXHR) {
+                ok(data.status === "ok", "Status is correct.");
+                deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
+            });
+            start();
+        }, 100);
     });
 });
         </script>
