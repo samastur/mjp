@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>QUnit Ajax+ Tests</title>
+        <link rel="stylesheet" href="lib/qunit-1.12.0.css">
+    </head>
+    <body>
+        <div id="qunit"></div>
+        <div id="qunit-fixture">
+            <form>
+                <input type="text" name="t1" value="Some test" />
+                <input type="text" name="t2" value="More text" disabled="disabled" />
+                <select name="t3">
+                    <option value="opt1">Option 1</option>
+                    <option value="opt2" selected="selected">Option 2</option>
+                    <option value="opt3">Option 3</option>
+                </select>
+                <textarea name="t4">First line
+Second line</textarea>
+                <input type="radio" name="t5" value="rad1" />
+                <input type="radio" name="t5" value="rad2" checked="checked" />
+                <input type="submit" name="save" value="Save" />
+            </form>
+        </div>
+        <script src="lib/qunit-1.12.0.js"></script>
+        <script src="../node_modules/requirejs/require.js"></script>
+        <script>
+require(['../src/ajaxplus'], function ($) {
+    var ctx = document.getElementById("qunit-fixture");
+
+
+    // HELPERS
+    module("Helper methods");
+
+    test("Test .serialize can serialize a form", function () {
+        var result = $("form", ctx).serialize();
+
+        ok(result === "t1=Some+test&t3=opt2&t4=First+line%0D%0ASecond+line&t5=rad2",
+           ".serialize worked");
+    });
+
+});
+        </script>
+    </body>
+</html>

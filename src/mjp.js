@@ -3,7 +3,8 @@ define([
     "./classes",
     "./events",
     "./deferred",
-    "./ajax"
+    "./ajax",
+    "./ajaxplus"
 ], function (mjp) {
     return (window.mjp = window.$ = mjp);
 });

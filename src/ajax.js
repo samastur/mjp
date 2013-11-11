@@ -105,35 +105,22 @@ define([
         }
     }
 
-    mjp.ajax = function (url, settings) {
-        var opts = {},
-            deferred = mjp.Deferred(),
-            xhr, data;
-
-        if (!settings) { settings = url; }
-
-        opts = mjp.extend(opts, mjp.ajaxSettings, settings);
-
-        opts.success && deferred.done(opts.success);
-        opts.error && deferred.fail(opts.error);
-        opts.complete && deferred.always(opts.complete);
-
-        // Build XHR and execute it
-        xhr = opts.xhr() || (new XMLHttpRequest());
+    function createXHR(url, opts, deferred) {
+        var xhr = opts.xhr();
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 xhrFinished(xhr, opts, deferred);
             }
         };
-        data = opts.data || null;
-        if (data) {
-            if (typeof data !== "string" && !opts.processData) {
-                data = mjp.param(data, opts.traditional);
+        opts.data || null;
+        if (opts.data) {
+            if (typeof opts.data !== "string" && !opts.processData) {
+                opts.data = mjp.param(opts.data, opts.traditional);
             }
             // Attach to URL if GET or HEAD, otherwise add to send
             if (/^(?:GET|HEAD)$/.test(opts.type)) {
-                url += (/\?/.type(url) ? "&" : "?") + data;
-                data = null;
+                url += (/\?/.type(url) ? "&" : "?") + opts.data;
+                opts.data = null;
             } else {
                 // Set headers
                 opts.headers["Content-Type"] = opts.contentType;
@@ -145,22 +132,50 @@ define([
 
         xhr.open(opts.type, url, opts.async, opts.username, opts.password);
         setHeaders(xhr, opts.headers);
-        // End of request building
-        if (!opts.beforeSend || opts.beforeSend(xhr, opts)) {
+        return xhr;
+    }
+
+    function createScript(url, opts, deferred) {
+        var script = document.createElement("script");
+        if (url && opts && deferred) {
+            return script;
+        }
+    }
+
+    mjp.ajax = function (url, settings) {
+        var opts = {},
+            deferred = mjp.Deferred(),
+            request;
+
+        if (!settings) { settings = url; }
+
+        opts = mjp.extend(opts, mjp.ajaxSettings, settings);
+
+        opts.success && deferred.done(opts.success);
+        opts.error && deferred.fail(opts.error);
+        opts.complete && deferred.always(opts.complete);
+
+        // Build XHR and execute it
+        if (opts.crossDomain || opts.dataType === "jsonp") {
+            request = createScript(url, opts, deferred);
+        } else {
+            request = createXHR(url, opts, deferred);
+        }
+        if (!opts.beforeSend || opts.beforeSend(request, opts)) {
             if (opts.timeout) {
                 setTimeout(function () {
                     if (deferred.state() === "pending") {
-                        xhr.abort();
-                        deferred.reject(xhr, "timeout");
+                        request.abort();
+                        deferred.reject(request, "timeout");
                     }
                 }, opts.timeout);
             }
-            xhr.send(data);  // data can be null which is fine
+            request.send(opts.data);  // data can be null which is fine
         } else { // Cancel the request
-            xhr.abort();
-            deferred.reject(xhr, "timeout");
+            request.abort();
+            deferred.reject(request, "timeout");
         }
-        return deferred.promise(xhr);
+        return deferred.promise(request);
     };
 
     // Call methods .get, .getJSON and .post
@@ -238,43 +253,6 @@ define([
                 }, "html");
             }
             return self;
-        },
-
-        // TODO: serialize & serializeArray add ~200 bytes to gzipped lib
-        serialize: function() {
-            return mjp.param( this.serializeArray() );
-        },
-
-        // Simplified jQuery version
-        serializeArray: function() {
-            var rCRLF = /\r?\n/g,
-                rcheckableType = /^(?:checkbox|radio)$/i,
-                rsubmitterTypes = /^(?:submit|button|image|reset|file)$/i,
-                rsubmittable = /^(?:input|select|textarea|keygen)/i;
-
-            return this.map(function(i, el) {
-                // If passed form element, then fetch its elements (form fields)
-                return el.elements ? mjp.makeArray(el.elements) : this;
-            })
-            // Filter out disabled, unchecked and unselected
-            .filter(function(i, el) {
-                return el.name && !el.disabled &&
-                    rsubmittable.test( el.nodeName ) &&
-                    !rsubmitterTypes.test( el.type ) &&
-                    ( el.checked || !rcheckableType.test( el.type ) );
-            })
-            // Grab values of the rest
-            .map(function( i, elem ) {
-                var val = elem.value;
-
-                return val == null ?
-                    null :
-                    Array.isArray( val ) ?
-                        mjp.map( val, function( val ) {
-                            return { name: elem.name, value: val.replace( rCRLF, "\r\n" ) };
-                        }) :
-                        { name: elem.name, value: val.replace( rCRLF, "\r\n" ) };
-            });
         }
     });
 

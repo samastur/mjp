@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>QUnit Deferred Tests</title>
+        <title>QUnit Ajax Tests</title>
         <link rel="stylesheet" href="lib/qunit-1.12.0.css">
     </head>
     <body>
@@ -69,13 +69,6 @@ require(['../src/ajax'], function ($) {
         ok(result === "param1=value1&param2=value2&param3%5Bparam4%5D=value", ".param worked");
     });
 
-    test("Test .serialize can serialize a form", function () {
-        var result = $("form", ctx).serialize();
-
-        ok(result === "t1=Some+test&t3=opt2&t4=First+line%0D%0ASecond+line&t5=rad2",
-           ".param worked");
-    });
-
 
 
     // AJAX
@@ -91,10 +84,11 @@ require(['../src/ajax'], function ($) {
         }, 100);
     });
 
-    asyncTest("Test .get", 2, function () {
+    asyncTest("Test .getJSON", 3, function () {
         var rslt = "";
         setTimeout(function () {
             $.get("gets/data.json", function (data, textStatus, jqXHR) {
+                ok(textStatus === "OK", "textStatus is correct.");
                 ok(data.status === "ok", "Status is correct.");
                 deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
             });
@@ -102,16 +96,18 @@ require(['../src/ajax'], function ($) {
         }, 100);
     });
 
-    asyncTest("Test .getJSON", 2, function () {
+    asyncTest("Test simple .get", 3, function () {
         var rslt = "";
         setTimeout(function () {
             $.get("gets/data.json", function (data, textStatus, jqXHR) {
+                ok(textStatus === "OK", "textStatus is correct.");
                 ok(data.status === "ok", "Status is correct.");
                 deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
             });
             start();
         }, 100);
     });
+
 });
         </script>
     </body>

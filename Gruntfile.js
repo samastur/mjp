@@ -103,7 +103,8 @@ module.exports = function( grunt ) {
                 "tests/core.html",
                 "tests/classes.html",
                 "tests/events.html",
-                "tests/deferred.html"
+                "tests/deferred.html",
+                "tests/ajaxplus.html"
             ],
             options: {
                 urls: ["http://localhost:9000/tests/ajax.html"]
@@ -131,11 +132,15 @@ module.exports = function( grunt ) {
     grunt.loadTasks( "build/tasks" );
 
     // Short list as a high frequency watch task
-    grunt.registerTask( "dev", [ "build:*:*", "jshint" ] );
+    grunt.registerTask( "dev", [ "build:*:*:-ajaxplus", "jshint" ] );
+    grunt.registerTask( "devall", [ "build:*:*", "jshint" ] );
 
     // Test
     grunt.registerTask( "test", [ "jshint", "connect", "qunit" ] );
 
     // Default grunt
     grunt.registerTask( "default", [ "dev", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
+
+    // Kitchensink
+    grunt.registerTask( "kitchensink", [ "devall", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
 };
