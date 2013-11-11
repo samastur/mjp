@@ -95,7 +95,7 @@ define(function () {
 
             if (sel_type === "string") {
                 if (sel.slice(0, 1) === "<") {
-                    raw_nodes = innerHTML(sel);
+                    nodes = innerHTML(sel);
                 } else if (sel.indexOf(",") > -1) { // Multiple selectors
                     // TODO: write test
                     sel = sel.split(",");
