@@ -28,8 +28,51 @@ Second line</textarea>
         <script src="../node_modules/requirejs/require.js"></script>
         <script>
 require(['../src/ajax'], function ($) {
-    var ctx = document.getElementById("qunit-fixture");
+    function createFakeXHR() {
+        return {
+            // Place to store results of methods
+            fake: true,
+            storedValues: {},
 
+            // Standard properties
+            readyState: 0,
+            responseText: null,
+            responseXML: null,
+
+            // Methods
+            getResponseHeader: function( key ) {
+            },
+            getAllResponseHeaders: function() {
+                return this.storedValues.headers;
+            },
+            setRequestHeader: function( name, value ) {
+                if (this.storedValues.headers !== []) {
+                    this.storedValues.headers = [];
+                }
+                this.storedValues.headers.push([name, value])
+                return this;
+            },
+            overrideMimeType: function( type ) {
+                this.storedValues.overrideMimeType = type;
+                return this;
+            },
+            open: function () {
+                this.storedValues.open = $.makeArray(arguments) || true;
+                return this;
+            },
+            send: function( data ) {
+                this.storedValues.abort = data || true;
+                return this;
+            },
+            abort: function( statusText ) {
+                this.storedValues.abort = statusText || true;
+                return this;
+            }
+        };
+    }
+
+    var ctx = document.getElementById("qunit-fixture"),
+        origSetup = $.extend({}, $.ajaxSettings);
 
     // HELPERS
     module("Helper methods");
@@ -70,6 +113,19 @@ require(['../src/ajax'], function ($) {
     });
 
 
+    // AJAX Setup
+    module("Ajax setup");
+
+    test("Test setHeaders", function () {
+        $.ajaxSetup({xhr: createFakeXHR});
+        $.ajax("/", {
+            headers: {a: 1, b: 2, c: 3}
+        });
+
+
+        $.ajaxSetup(origSetup);
+    });
+
 
     // AJAX
     module("Ajax calls");
@@ -103,6 +159,18 @@ require(['../src/ajax'], function ($) {
                 ok(textStatus === "OK", "textStatus is correct.");
                 ok(data.status === "ok", "Status is correct.");
                 deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
+            });
+            start();
+        }, 100);
+    });
+
+    asyncTest("Test xml ajax", 2, function () {
+        var rslt = "";
+        setTimeout(function () {
+            $.ajax("gets/data.xml", {dataType: "xml", success: function (data, textStatus, jqXHR) {
+                ok(textStatus === "OK", "textStatus is correct.");
+                ok(data.getElementsByTagName("to")[0].textContent === "Me", "To values is correct.");
+                }
             });
             start();
         }, 100);
