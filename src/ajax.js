@@ -125,9 +125,6 @@ define([
             }
             // Attach to URL if GET or HEAD, otherwise add to send
             if (/^(?:GET|HEAD)$/.test(opts.type)) {
-                /*
-                url += (/\?/.test(url) ? "&" : "?") + opts.data;
-                */
                 url = addToUrl(url, opts.data);
                 opts.data = null;
             } else {
@@ -138,6 +135,11 @@ define([
 
         // Override mime type for XML (just in case)
         opts.dataType === "xml" && xhr.overrideMimeType("text/xml");
+
+        // Set timeout if it exists
+        if (opts.timeout) {
+            xhr.timeout = opts.timeout;
+        }
 
         xhr.open(opts.type, url, opts.async, opts.username, opts.password);
         setHeaders(xhr, opts.headers);
@@ -167,7 +169,8 @@ define([
         opts.error && deferred.fail(opts.error);
         opts.complete && deferred.always(opts.complete);
 
-        if (!opts.cache) {
+        // Avoid caching (always for scripts)
+        if (!opts.cache || opts.dataType === "script") {
             addToUrl(url, "_=" + (new Date()).getTime());
         }
         // Build XHR and execute it
@@ -176,19 +179,23 @@ define([
         } else {
             request = createXHR(url, opts, deferred);
         }
-        if (!opts.beforeSend || opts.beforeSend(request, opts)) {
-            if (opts.timeout) {
-                setTimeout(function () {
-                    if (deferred.state() === "pending") {
-                        request.abort();
-                        deferred.reject(request, "timeout");
-                    }
-                }, opts.timeout);
+        if (request) {
+            if (!opts.beforeSend || opts.beforeSend(request, opts)) {
+                if (opts.timeout) {
+                    setTimeout(function () {
+                        if (deferred.state() === "pending") {
+                            request.abort();
+                            deferred.reject(request, "timeout");
+                        }
+                    }, opts.timeout);
+                }
+                request.send(opts.data);  // data can be null which is fine
+            } else { // Cancel the request
+                request.abort();
+                deferred.reject(request, "timeout");
             }
-            request.send(opts.data);  // data can be null which is fine
-        } else { // Cancel the request
-            request.abort();
-            deferred.reject(request, "timeout");
+        } else {
+            deferred.reject(null, "error");
         }
         return deferred.promise(request);
     };

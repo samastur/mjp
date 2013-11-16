@@ -38,7 +38,7 @@ require(['../src/ajax'], function ($) {
             ok($("#node").html() === "<span>Text in a span!</span>",
                "load() works.");
             start();
-        }, 100);
+        }, 50);
     });
 
     asyncTest("Test .getJSON", 3, function () {
@@ -50,7 +50,7 @@ require(['../src/ajax'], function ($) {
                 deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
             });
             start();
-        }, 100);
+        }, 50);
     });
 
     asyncTest("Test simple .get", 3, function () {
@@ -62,7 +62,7 @@ require(['../src/ajax'], function ($) {
                 deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
             });
             start();
-        }, 100);
+        }, 50);
     });
 
     asyncTest("Test xml ajax", 2, function () {
@@ -74,7 +74,7 @@ require(['../src/ajax'], function ($) {
                 }
             });
             start();
-        }, 100);
+        }, 50);
     });
 
     asyncTest("Test getScript", 3, function () {
@@ -86,7 +86,7 @@ require(['../src/ajax'], function ($) {
                 ok($.trim(script) === "var LOADED_SCRIPT = 'Works!';", "Script is correct.");
             });
             start();
-        }, 100);
+        }, 50);
     });
 
 });
