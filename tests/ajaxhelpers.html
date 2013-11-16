@@ -162,6 +162,16 @@ require(['../src/ajax'], function ($) {
 
         $.ajaxSetup(origSetup);
     });
+
+    test("Test that xml data type overrides mime type", function () {
+        var xhr = null;
+
+        $.ajaxSetup({xhr: createFakeXHR});
+        xhr = $.ajax("/", { dataType: "xml" });
+        ok(xhr.storedValues.overrideMimeType === "text/xml", "Mime type set.");
+
+        $.ajaxSetup(origSetup);
+    });
 });
         </script>
     </body>

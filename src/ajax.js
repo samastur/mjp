@@ -106,6 +106,11 @@ define([
         }
     }
 
+    function addToUrl(url, data_string) {
+        url += (/\?/.test(url) ? "&" : "?") + data_string;
+        return url;
+    }
+
     function createXHR(url, opts, deferred) {
         var xhr = opts.xhr();
         xhr.onreadystatechange = function () {
@@ -120,7 +125,10 @@ define([
             }
             // Attach to URL if GET or HEAD, otherwise add to send
             if (/^(?:GET|HEAD)$/.test(opts.type)) {
+                /*
                 url += (/\?/.test(url) ? "&" : "?") + opts.data;
+                */
+                url = addToUrl(url, opts.data);
                 opts.data = null;
             } else {
                 // Set headers
@@ -148,7 +156,10 @@ define([
             deferred = mjp.Deferred(),
             request;
 
-        if (!settings) { settings = url; }
+        if (!settings) {
+            settings = url;
+            url = settings.url;
+        }
 
         opts = mjp.extend(opts, mjp.ajaxSettings, settings);
 
@@ -156,6 +167,9 @@ define([
         opts.error && deferred.fail(opts.error);
         opts.complete && deferred.always(opts.complete);
 
+        if (!opts.cache) {
+            addToUrl(url, "_=" + (new Date()).getTime());
+        }
         // Build XHR and execute it
         if (opts.crossDomain || opts.dataType === "jsonp") {
             request = createScript(url, opts, deferred);
@@ -203,7 +217,7 @@ define([
         get: createCall({}),
         getJSON: createCall({dataType: "json"}),
         post: createCall({type: "POST"}),
-        //getScript: createCall({dataType: "script"}),
+        getScript: createCall({dataType: "script"}),
 
         // Helpers
         param : function (obj, traditional) { // Borrowed from jQuery

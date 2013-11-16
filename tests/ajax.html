@@ -77,6 +77,18 @@ require(['../src/ajax'], function ($) {
         }, 100);
     });
 
+    asyncTest("Test getScript", 3, function () {
+        var LOADED_SCRIPT;
+        setTimeout(function () {
+            $.getScript("gets/data.js", function (script, textStatus, jqXHR) {
+                ok(textStatus === "OK", "textStatus is correct.");
+                ok(window.LOADED_SCRIPT === "Works!", "Script was also executed.");
+                ok($.trim(script) === "var LOADED_SCRIPT = 'Works!';", "Script is correct.");
+            });
+            start();
+        }, 100);
+    });
+
 });
         </script>
     </body>
