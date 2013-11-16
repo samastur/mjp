@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>QUnit Ajax Helpers Tests</title>
+        <link rel="stylesheet" href="lib/qunit-1.12.0.css">
+    </head>
+    <body>
+        <div id="qunit"></div>
+        <div id="qunit-fixture">
+            <p id="node"></p>
+            <form>
+                <input type="text" name="t1" value="Some test" />
+                <input type="text" name="t2" value="More text" disabled="disabled" />
+                <select name="t3">
+                    <option value="opt1">Option 1</option>
+                    <option value="opt2" selected="selected">Option 2</option>
+                    <option value="opt3">Option 3</option>
+                </select>
+                <textarea name="t4">First line
+Second line</textarea>
+                <input type="radio" name="t5" value="rad1" />
+                <input type="radio" name="t5" value="rad2" checked="checked" />
+                <input type="submit" name="save" value="Save" />
+            </form>
+        </div>
+        <script src="lib/qunit-1.12.0.js"></script>
+        <script src="../node_modules/requirejs/require.js"></script>
+        <script>
+require(['../src/ajax'], function ($) {
+    function createFakeXHR() {
+        return {
+            // Place to store results of methods
+            fake: true,
+            storedValues: {headers:[]},
+
+            // Standard properties
+            readyState: 0,
+            responseText: null,
+            responseXML: null,
+
+            // Methods
+            getResponseHeader: function( key ) {
+            },
+            getAllResponseHeaders: function() {
+                return this.storedValues.headers;
+            },
+            setRequestHeader: function( name, value ) {
+                this.storedValues.headers.push([name, value]);
+                return this;
+            },
+            overrideMimeType: function( type ) {
+                this.storedValues.overrideMimeType = type;
+                return this;
+            },
+            open: function () {
+                this.storedValues.open = $.makeArray(arguments) || true;
+                return this;
+            },
+            send: function( data ) {
+                this.storedValues.abort = data || true;
+                return this;
+            },
+            abort: function( statusText ) {
+                this.storedValues.abort = statusText || true;
+                return this;
+            }
+        };
+    }
+
+    var ctx = document.getElementById("qunit-fixture"),
+        origSetup = $.extend({}, $.ajaxSettings);
+
+    // HELPERS
+    module("Helper methods");
+
+    test("Test ajaxSetup changes defaults", function () {
+        ok($.ajaxSettings.async, "async true by default.");
+        $.ajaxSetup({async: false});
+        ok($.ajaxSettings.async === false, "async changed to false");
+    });
+
+    test("Test .param can parametrize array of name:value", function () {
+        var arr = [{name: "param1", value: "value1"},
+                   {name: "param2", value:"value2"}],
+            result = $.param(arr);
+
+        ok(result === "param1=value1&param2=value2", ".param worked");
+    });
+
+    test("Test .param can parametrize shallow objects", function () {
+        var obj = {
+            param1: "value1",
+            param2: "value2"
+        },
+        result = $.param(obj);
+
+        ok(result === "param1=value1&param2=value2", ".param worked");
+    });
+
+    test("Test .param can parametrize deep objects", function () {
+        var obj = {
+            param1: "value1",
+            param2: "value2",
+            param3: { param4: "value" }
+        },
+        result = $.param(obj);
+
+        ok(result === "param1=value1&param2=value2&param3%5Bparam4%5D=value", ".param worked");
+    });
+
+
+    // AJAX Setup
+    module("Ajax setup");
+
+    test("Test setHeaders", function () {
+        var xhr = null,
+            expected = [
+                ['X-Requested-With', 'XMLHttpRequest'],
+                ['a', 1],
+                ['b', 2],
+                ['c', 3]
+            ],
+            headers= {a: 1, b: 2, c: 3};
+        $.ajaxSetup({xhr: createFakeXHR});
+        xhr = $.ajax("/", {
+            headers: headers
+        });
+        deepEqual(expected, xhr.storedValues.headers, "Headers correctly set.");
+
+        $.ajaxSetup({headers: []}); // Reset headers
+        $.ajaxSetup(origSetup);
+    });
+
+    test("Test contentType gets set on POST", function () {
+        var xhr = null,
+            contentType = "text/bla";
+
+        $.ajaxSetup({xhr: createFakeXHR, headers: []});
+        xhr = $.ajax("/", {
+            contentType: contentType,
+            type: "POST",
+            data: "kitten"
+        });
+        deepEqual(xhr.storedValues.headers[1], ['Content-Type', contentType],
+                  "Content type set correctly.");
+
+        $.ajaxSetup(origSetup);
+    });
+
+    test("Test contentType does not get set on GET", function () {
+        var xhr = null,
+            contentType = "text/bla";
+
+        $.ajaxSetup({xhr: createFakeXHR, headers: []});
+        xhr = $.ajax("/", {
+            contentType: contentType,
+            data: "kitten"
+        });
+        deepEqual(xhr.storedValues.headers, [['X-Requested-With', 'XMLHttpRequest']],
+                  "Content type not set.");
+
+        $.ajaxSetup(origSetup);
+    });
+});
+        </script>
+    </body>
+</html>

@@ -104,6 +104,7 @@ module.exports = function( grunt ) {
                 "tests/classes.html",
                 "tests/events.html",
                 "tests/deferred.html",
+                "tests/ajaxhelpers.html",
                 "tests/ajaxplus.html"
             ],
             options: {

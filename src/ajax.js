@@ -93,6 +93,7 @@ define([
                         break;
                     case "xml":
                         data = xhr.responseXML;
+                        break;
                 } // default handles 'text'
                 sCode[200] && sCode[200](data, xhr.statusText, xhr);
                 deferred.resolve(data, xhr.statusText, xhr);
@@ -119,7 +120,7 @@ define([
             }
             // Attach to URL if GET or HEAD, otherwise add to send
             if (/^(?:GET|HEAD)$/.test(opts.type)) {
-                url += (/\?/.type(url) ? "&" : "?") + opts.data;
+                url += (/\?/.test(url) ? "&" : "?") + opts.data;
                 opts.data = null;
             } else {
                 // Set headers
