@@ -18,9 +18,11 @@
             </ul>
         </div>
         <script src="lib/qunit-1.12.0.js"></script>
+        <script>QUnit.config.autostart = false;</script>
         <script src="../node_modules/requirejs/require.js"></script>
         <script>
 require(['../src/core'], function (mjp) {
+    QUnit.start();
     var ctx = document.getElementById("qunit-fixture");
 
     test("Test trimming whitespace", function () {

@@ -25,9 +25,11 @@ Second line</textarea>
             </form>
         </div>
         <script src="lib/qunit-1.12.0.js"></script>
+        <script>QUnit.config.autostart = false;</script>
         <script src="../node_modules/requirejs/require.js"></script>
         <script>
 require(['../src/ajax'], function ($) {
+    QUnit.start();
     function createFakeXHR() {
         return {
             // Place to store results of methods

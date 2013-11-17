@@ -11,9 +11,11 @@
             <p class="class1 class2 class3">Some text</p>
         </div>
         <script src="lib/qunit-1.12.0.js"></script>
+        <script>QUnit.config.autostart = false;</script>
         <script src="../node_modules/requirejs/require.js"></script>
         <script>
 require(['../src/classes'], function (mjp) {
+    QUnit.start();
     var ctx = document.getElementById("qunit-fixture");
 
     test("Test hasClass", function () {
