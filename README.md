@@ -65,5 +65,9 @@ Exclude more than one module:
 grunt custom:-ajax,-deferred
 ```
 
-Use +<module_name> if you want to add a module to build (not needed now since
-all are by default). Current modules are: classes, events, deferred, ajax.
+Use +<module_name> if you want to add a module to build. Current modules are:
+classes, events, deferred, ajax, ajaxplus. Or to include all:
+
+```bash
+grunt kitchensink
+```
