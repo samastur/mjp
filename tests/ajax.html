@@ -9,86 +9,72 @@
         <div id="qunit"></div>
         <div id="qunit-fixture">
             <p id="node"></p>
-            <form>
-                <input type="text" name="t1" value="Some test" />
-                <input type="text" name="t2" value="More text" disabled="disabled" />
-                <select name="t3">
-                    <option value="opt1">Option 1</option>
-                    <option value="opt2" selected="selected">Option 2</option>
-                    <option value="opt3">Option 3</option>
-                </select>
-                <textarea name="t4">First line
-Second line</textarea>
-                <input type="radio" name="t5" value="rad1" />
-                <input type="radio" name="t5" value="rad2" checked="checked" />
-                <input type="submit" name="save" value="Save" />
-            </form>
         </div>
         <script src="lib/qunit-1.12.0.js"></script>
         <script src="../node_modules/requirejs/require.js"></script>
         <script>
+window.callback = function (data) {
+    window.rslt = data;
+};
 require(['../src/ajax'], function ($) {
     // AJAX
     module("Ajax calls");
 
     asyncTest("Test .load", 1, function () {
-        var rslt = "";
         $("#node").load("gets/snippet.html");
         setTimeout(function () {
             ok($("#node").html() === "<span>Text in a span!</span>",
                "load() works.");
             start();
-        }, 50);
+        }, 200);
     });
 
     asyncTest("Test .getJSON", 3, function () {
-        var rslt = "";
-        setTimeout(function () {
-            $.get("gets/data.json", function (data, textStatus, jqXHR) {
-                ok(textStatus === "OK", "textStatus is correct.");
-                ok(data.status === "ok", "Status is correct.");
-                deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
-            });
+        $.get("gets/data.json", function (data, textStatus, jqXHR) {
+            ok(textStatus === "OK", "textStatus is correct.");
+            ok(data.status === "ok", "Status is correct.");
+            deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
             start();
-        }, 50);
+        });
     });
 
     asyncTest("Test simple .get", 3, function () {
-        var rslt = "";
-        setTimeout(function () {
-            $.get("gets/data.json", function (data, textStatus, jqXHR) {
-                ok(textStatus === "OK", "textStatus is correct.");
-                ok(data.status === "ok", "Status is correct.");
-                deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
-            });
+        $.get("gets/data.json", function (data, textStatus, jqXHR) {
+            ok(textStatus === "OK", "textStatus is correct.");
+            ok(data.status === "ok", "Status is correct.");
+            deepEqual(data.value, [1, 2, 3, 4, 5], "Value is also correct.");
             start();
-        }, 50);
-    });
-
-    asyncTest("Test xml ajax", 2, function () {
-        var rslt = "";
-        setTimeout(function () {
-            $.ajax("gets/data.xml", {dataType: "xml", success: function (data, textStatus, jqXHR) {
-                ok(textStatus === "OK", "textStatus is correct.");
-                ok(data.getElementsByTagName("to")[0].textContent === "Me", "To values is correct.");
-                }
-            });
-            start();
-        }, 50);
+        });
     });
 
     asyncTest("Test getScript", 3, function () {
-        var LOADED_SCRIPT;
-        setTimeout(function () {
-            $.getScript("gets/data.js", function (script, textStatus, jqXHR) {
-                ok(textStatus === "OK", "textStatus is correct.");
-                ok(window.LOADED_SCRIPT === "Works!", "Script was also executed.");
-                ok($.trim(script) === "var LOADED_SCRIPT = 'Works!';", "Script is correct.");
-            });
+        $.getScript("gets/data.js", function (script, textStatus, jqXHR) {
+            ok(textStatus === "OK", "textStatus is correct.");
+            ok(window.LOADED_SCRIPT === "Works!", "Script was also executed.");
+            ok($.trim(script) === "var LOADED_SCRIPT = 'Works!';", "Script is correct.");
             start();
-        }, 50);
+        });
     });
 
+    asyncTest("Test xml ajax", 2, function () {
+        $.ajax("gets/data.xml", {dataType: "xml", success: function (data, textStatus, jqXHR) {
+            ok(textStatus === "OK", "textStatus is correct.");
+            ok(data.getElementsByTagName("to")[0].textContent === "Me", "To values is correct.");
+            start();
+            }
+        });
+    });
+
+    asyncTest("Test jsonp ajax", 2, function () {
+
+        $.ajax("http://localhost/~markos/mjp/tests/gets/data_jsonp.js", {dataType: "jsonp", success: function (data, textStatus, jqXHR) {
+            ok(window.rslt === "JSONP Works!", "Script was also executed.");
+            ok(textStatus === "OK", "textStatus is correct.");
+            window.callback = null;
+            start();
+            }
+        });
+    });
 });
         </script>
     </body>
