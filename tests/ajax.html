@@ -89,6 +89,18 @@ require(['../src/ajax'], function ($) {
         };
         $.ajax("http://localhost/~markos/mjp/tests/gets/flickr.json", settings);
     });
+
+    asyncTest("Test jsonp ajax error handling", 2, function () {
+        var settings = {
+            dataType: "jsonp",
+            error: function (textStatus, jqXHR) {
+                ok(textStatus === "error", "textStatus is correct.");
+                ok(jqXHR.state() === "rejected", "request state is correct too.");
+                start();
+            }
+        };
+        $.ajax("http://localhost/~markos/mjp/tests/gets/missing_jsonp.json", settings);
+    });
 });
         </script>
     </body>
