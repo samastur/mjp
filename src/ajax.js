@@ -41,7 +41,11 @@ define([
             dataType: "json",
             headers: {},
             jsonp: "callback",
-            // jsonpCallback
+            jsonpCallback: function () {
+                var callback = ("mjp" + Math.random() + (new Date()).getTime()).replace(".", "");
+                this[callback] = true;
+                return callback;
+            },
             // password
             processData: true,
             statusCode: {},

@@ -8,9 +8,13 @@ define([
 
     function createScript(url, opts, deferred) {
         var script = document.createElement("script"),
-            jqXHR,
-            callback;
+            jqXHR, callbackName, callback, responseContainer;
+
         script.async = true;
+
+        callbackName = mjp.isFunction(opts.jsonpCallback) ? opts.jsonpCallback() : opts.jsonpCallback;
+
+        url = addToUrl(url, opts.jsonp + "=" + callbackName);
 
         jqXHR = {
             abort: function () {
@@ -22,15 +26,22 @@ define([
             },
             send: function (data) {
                 callback = function (e) {
-                    removeNode(script);
                     callback = null;
+                    removeNode(script);
+                    window[callbackName] = null;
                     if (e) {
                         if (e.type === "load") {
-                            deferred.resolve("", "OK", jqXHR);
+                            deferred.resolve(responseContainer, "OK", jqXHR);
                         } else { // Error
                             deferred.reject("error", jqXHR);
                         }
                     }
+                };
+
+                // Install callback
+                window[callbackName] = function () {
+                    var args = arguments;
+                    responseContainer = (args && args[0]) || {};
                 };
 
                 // Serialize data it if it isn't yet

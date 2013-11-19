@@ -68,7 +68,6 @@ require(['../src/ajax'], function ($) {
     });
 
     asyncTest("Test jsonp ajax", 2, function () {
-
         $.ajax("http://localhost/~markos/mjp/tests/gets/data_jsonp.js", {dataType: "jsonp", success: function (data, textStatus, jqXHR) {
             ok(window.rslt === "JSONP Works!", "Script was also executed.");
             ok(textStatus === "OK", "textStatus is correct.");
@@ -76,6 +75,19 @@ require(['../src/ajax'], function ($) {
             start();
             }
         });
+    });
+
+    asyncTest("Test jsonp ajax with custom jsonpCallback", 2, function () {
+        var settings = {
+            dataType: "jsonp",
+            jsonpCallback: "jsonFlickrApi",
+            success: function (data, textStatus, jqXHR) {
+                ok(data.photos.perpage === 10, "Data is correct");
+                ok(textStatus === "OK", "textStatus is correct.");
+                start();
+            }
+        };
+        $.ajax("http://localhost/~markos/mjp/tests/gets/flickr.json", settings);
     });
 });
         </script>
