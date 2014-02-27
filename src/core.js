@@ -58,6 +58,8 @@ define(function () {
     }
 
     var fn = {
+            mjp: "v0.8.0",
+
             each: _forEach,
 
             map: function (callback) {
