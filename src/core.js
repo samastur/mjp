@@ -77,7 +77,7 @@ define(function () {
             },
 
             html: function (value) {
-                if (value) {
+                if (typeof value === "string") {
                     this.each(function (i, el) {
                         el.innerHTML = value;
                     });
