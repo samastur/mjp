@@ -46,6 +46,17 @@ define([
             return mjp(copies);
         },
 
+        remove: function () {
+            this.each(function (i, el) {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                    // WARNING/TODO: Does NOT remove handlers => leaks memory
+                    // Fix events first before you can fix this
+                }
+            });
+            return this;
+        },
+
         append: function () {
             var nodes = mjp(arguments);
 
