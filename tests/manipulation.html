@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>QUnit Manipulation Tests</title>
+        <link rel="stylesheet" href="lib/qunit-1.12.0.css">
+    </head>
+    <body>
+        <div id="qunit"></div>
+        <div id="qunit-fixture">
+            <p id="paragraph">Some text</p>
+            <ul>
+                <li>Item 1</li>
+                <li class="selected">Item 2</li>
+                <li>Item 3</li>
+                <li class="selected">Item 4</li>
+                <li>Item 5</li>
+            </ul>
+        </div>
+        <script src="lib/qunit-1.12.0.js"></script>
+        <script>QUnit.config.autostart = false;</script>
+        <script src="../node_modules/requirejs/require.js"></script>
+        <script>
+require(['../src/manipulation'], function (mjp) {
+    QUnit.start();
+    var ctx = document.getElementById("qunit-fixture");
+
+    /******************************************************
+     * CLONE
+     ******************************************************/
+    test("Test clone returns a copy of an element", function () {
+        var el = mjp("<span>A</span>"),
+            copy = el.clone();
+        ok(el.html() === copy.html(), "HTML of copies is the same");
+
+        copy.html("B")
+        ok(el.html() !== copy.html(), "HTML of copies has changed");
+        ok(el.html() === "A", "Original element is unchanged");
+        ok(copy.html() === "B", "Copy is now different");
+    });
+
+    test("Test clone returns copies of multiple elements", function () {
+        var els = mjp("li", ctx),
+            cloned = els.clone()
+            txt = "cloned";
+
+        ok(els.length === cloned.length,
+            "Original and copies are equal in size");
+
+        // Change cloned which shouldn't affect originals
+        cloned.each(function (i, el) {
+            el.innerHTML += txt;
+        });
+
+        els.each(function (i, el) {
+            ok(el.innerHTML + txt === cloned[i].innerHTML, "Original and cloned have different content");
+        });
+    });
+
+    /******************************************************
+     * APPEND
+     ******************************************************/
+    test("Test append content as a string", function () {
+        var content = "<span>Test</span>"
+        mjp("#paragraph").append(content);
+        ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
+    });
+});
+        </script>
+    </body>
+</html>

@@ -103,6 +103,7 @@ module.exports = function( grunt ) {
                 "tests/core.html",
                 "tests/classes.html",
                 "tests/events.html",
+                "tests/manipulation.html",
                 "tests/deferred.html",
                 "tests/ajaxhelpers.html",
                 "tests/ajaxplus.html"
@@ -143,5 +144,5 @@ module.exports = function( grunt ) {
     grunt.registerTask( "default", [ "dev", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
 
     // Kitchensink
-    grunt.registerTask( "kitchensink", [ "devall", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
+    grunt.registerTask( "kitchensink", [ "devall", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size", "manipulation" ] );
 };
