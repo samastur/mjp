@@ -76,6 +76,15 @@ require(['../src/manipulation'], function (mjp) {
          ok(correct_removal, "The right ones were removed.");
      });
 
+     test("Test removing unattached elements just returns them", function () {
+         var els = [
+             mjp("<span>A</span>"),
+             mjp("<p>B</p>")
+         ], removed;
+         removed = mjp(els).remove();
+         deepEqual(els, removed, "Removed elements are the same");
+     });
+
     /******************************************************
      * APPEND
      ******************************************************/
