@@ -2,6 +2,7 @@ define([
     "./core"
 ], function (mjp) {
     mjp.handlers = {};
+    mjp.node_handlers = {};
 
     function normalizeEvent(e) {
         var ev = {originalEvent: e,
@@ -24,10 +25,23 @@ define([
         return e;
     }
 
-    function getHandlerId() {
+    function getHandlerId(db) {
         var id;
-        while((id=Math.ceil(Math.random()*10000)) in mjp.handlers) {}
+        while((id=Math.ceil(Math.random()*10000)) in db) {}
         return id;
+    }
+
+    function getNodeId(node) {
+        var nid;
+        if (!node.hasAttribute("mjp")) {
+            nid = node.setAttribute("mjp", getHandlerId(mjp.node_handlers));
+            mjp.node_handlers[nid] = {};
+        }
+        return node.getAttribute("mjp");
+    }
+
+    function saveNodeHandler(node, ev_type, handler) {
+        getNodeId(node, ev_type, handler);
     }
 
     function wrapHandler(func) {
@@ -36,7 +50,7 @@ define([
             return func.call(this, ev);
         };
         if (!func.mjp) {
-            func.mjp = getHandlerId();
+            func.mjp = getHandlerId(mjp.handlers);
             mjp.handlers[func.mjp] = f;
         }
         return mjp.handlers[func.mjp];
@@ -50,6 +64,7 @@ define([
     mjp.extend(mjp.fn, {
         on: function(ev_type, handler) {
             this.each(function (i, node) {
+                saveNodeHandler(node, ev_type, handler);
                 if (node.addEventListener) {
                     node.addEventListener(ev_type, wrapHandler(handler));
                 } else {  // For IE8
