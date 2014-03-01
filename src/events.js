@@ -41,7 +41,16 @@ define([
     }
 
     function saveNodeHandler(node, ev_type, handler) {
-        getNodeId(node, ev_type, handler);
+        var nid = getNodeId(node, ev_type, handler);
+        if (!mjp.node_handlers[nid]) {
+            mjp.node_handlers[nid] = {};
+        }
+        if (!mjp.node_handlers[nid][ev_type]) {
+            mjp.node_handlers[nid][ev_type] = [];
+        }
+        if (mjp.node_handlers[nid][ev_type].indexOf(handler) === -1) { // indexOf does not exist on IE8
+            mjp.node_handlers[nid][ev_type].push(handler);
+        }
     }
 
     function wrapHandler(func) {
