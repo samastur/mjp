@@ -2,7 +2,7 @@ define([
     "./core"
 ], function (mjp) {
     mjp.handlers = {};
-    mjp.node_handlers = {};
+    mjp.nh = {};
 
     function normalizeEvent(e) {
         var ev = {originalEvent: e,
@@ -34,22 +34,23 @@ define([
     function getNodeId(node) {
         var nid;
         if (!node.hasAttribute("mjp")) {
-            nid = node.setAttribute("mjp", getHandlerId(mjp.node_handlers));
-            mjp.node_handlers[nid] = {};
+            nid = node.setAttribute("mjp", getHandlerId(mjp.nh));
+            mjp.nh[nid] = {};
         }
         return node.getAttribute("mjp");
     }
 
     function saveNodeHandler(node, ev_type, handler) {
+        // mjp.nh are mapping of node's event handlers [node][event][handler]
         var nid = getNodeId(node, ev_type, handler);
-        if (!mjp.node_handlers[nid]) {
-            mjp.node_handlers[nid] = {};
+        if (!mjp.nh[nid]) {
+            mjp.nh[nid] = {};
         }
-        if (!mjp.node_handlers[nid][ev_type]) {
-            mjp.node_handlers[nid][ev_type] = [];
+        if (!mjp.nh[nid][ev_type]) {
+            mjp.nh[nid][ev_type] = {};
         }
-        if (mjp.node_handlers[nid][ev_type].indexOf(handler) === -1) { // indexOf does not exist on IE8
-            mjp.node_handlers[nid][ev_type].push(handler);
+        if (!mjp.nh[nid][ev_type][handler.mjp]) {
+            mjp.nh[nid][ev_type][handler.mjp] = true;
         }
     }
 
@@ -69,27 +70,42 @@ define([
         return func.mjp ? mjp.handlers[func.mjp] : func;
     }
 
+    function getObjKeys(obj) {
+        var keys = [];
+        for(var k in obj) {
+            obj.hasOwnProperty(k) && keys.push(k);
+        }
+        return keys;
+    }
+
     // Event handlers
     mjp.extend(mjp.fn, {
         on: function(ev_type, handler) {
+            var wrapped = wrapHandler(handler);
             this.each(function (i, node) {
-                saveNodeHandler(node, ev_type, handler);
                 if (node.addEventListener) {
-                    node.addEventListener(ev_type, wrapHandler(handler));
+                    node.addEventListener(ev_type, wrapped);
                 } else {  // For IE8
-                    node.attachEvent("on"+ev_type, wrapHandler(handler));
+                    node.attachEvent("on"+ev_type, wrapped);
                 }
+                saveNodeHandler(node, ev_type, wrapped);
             });
             return this;
         },
 
         off: function (ev_type, handler) {
             this.each(function (i, node) {
-                if (node.removeEventListener) {
-                    node.removeEventListener(ev_type, getHandler(handler));
-                } else { // For IE8
-                    node.detachEvent("on"+ev_type, getHandler(handler));
-                }
+                var events = ev_type ? [ev_type] : getObjKeys(mjp.nh[node]);
+                mjp(events).each(function (j, ev_type) {
+                    var handlers = handler ? [handler] : getObjKeys(mjp.nh[node][ev_type]);
+                    mjp(handlers).each(function (k, handler) {
+                        if (node.removeEventListener) {
+                            node.removeEventListener(ev_type, getHandler(handler));
+                        } else { // For IE8
+                            node.detachEvent("on"+ev_type, getHandler(handler));
+                        }
+                    });
+                });
             });
         },
 
