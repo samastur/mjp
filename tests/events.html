@@ -24,6 +24,18 @@ require(['../src/events'], function (mjp) {
         value = this.value;
     }
 
+    function handler_a(e) {
+        value += 1;
+    }
+
+    function handler_b(e) {
+        value += 2;
+    }
+
+    function handler_c(e) {
+        value += 4;
+    }
+
     function attach_and_test_handlers() {
         mjp("input", ctx).on("click", handler);
         mjp("#button1")[0].click();
@@ -50,6 +62,36 @@ require(['../src/events'], function (mjp) {
         mjp("#button2").trigger("click");
 
         ok(value == 2, "Handler was triggered.");
+        value = 0;
+    });
+
+    test("Test that all triggers for event type can be removed", function () {
+        mjp("#button1").on("click", handler_a)
+                       .on("click", handler_b);
+        mjp("#button1").on("focus", handler_c);
+        mjp("#button2").on("click", handler_c);
+
+        mjp("#button1")[0].click();
+        ok(value == 3, "Only click handlers were triggered.");
+
+        mjp("#button1").off("click");
+        mjp("#button1")[0].click();
+        ok(value == 3, "Click handlers were removed.");
+        value = 0;
+    });
+
+    test("Test that all triggers for node can be removed", function () {
+        mjp("#button1").on("click", handler_a)
+                       .on("click", handler_b);
+        mjp("#button2").on("click", handler_c);
+
+        mjp("#button1")[0].click();
+        ok(value == 3, "All node handlers were triggered.");
+
+        mjp("#button1").off();
+        mjp("#button1")[0].click();
+        ok(value == 3, "All handlers were removed.");
+        value = 0;
     });
 });
         </script>

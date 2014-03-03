@@ -34,23 +34,24 @@ define([
     function getNodeId(node) {
         var nid;
         if (!node.hasAttribute("mjp")) {
-            nid = node.setAttribute("mjp", getHandlerId(mjp.nh));
+            nid = getHandlerId(mjp.nh);
+            node.setAttribute("mjp", nid);
             mjp.nh[nid] = {};
         }
         return node.getAttribute("mjp");
     }
 
-    function saveNodeHandler(node, ev_type, handler) {
+    function saveNodeHandler(node, ev_type, func) {
         // mjp.nh are mapping of node's event handlers [node][event][handler]
-        var nid = getNodeId(node, ev_type, handler);
+        var nid = getNodeId(node);
         if (!mjp.nh[nid]) {
             mjp.nh[nid] = {};
         }
         if (!mjp.nh[nid][ev_type]) {
             mjp.nh[nid][ev_type] = {};
         }
-        if (!mjp.nh[nid][ev_type][handler.mjp]) {
-            mjp.nh[nid][ev_type][handler.mjp] = true;
+        if (!mjp.nh[nid][ev_type][func.mjp]) {
+            mjp.nh[nid][ev_type][func.mjp] = func;
         }
     }
 
@@ -67,6 +68,9 @@ define([
     }
 
     function getHandler(func) {
+        /* Return wrapped function; if it has mjp attribute, then it
+         * is original so fetch wrapper, otherwise it is wrapper ready
+         * to be returned */
         return func.mjp ? mjp.handlers[func.mjp] : func;
     }
 
@@ -88,21 +92,29 @@ define([
                 } else {  // For IE8
                     node.attachEvent("on"+ev_type, wrapped);
                 }
-                saveNodeHandler(node, ev_type, wrapped);
+                saveNodeHandler(node, ev_type, handler);
             });
             return this;
         },
 
         off: function (ev_type, handler) {
             this.each(function (i, node) {
-                var events = ev_type ? [ev_type] : getObjKeys(mjp.nh[node]);
+                var nid = getNodeId(node),
+                    events = ev_type ? [ev_type] : getObjKeys(mjp.nh[nid]);
                 mjp(events).each(function (j, ev_type) {
-                    var handlers = handler ? [handler] : getObjKeys(mjp.nh[node][ev_type]);
-                    mjp(handlers).each(function (k, handler) {
+                    var handlers = [], k;
+                    if (handler) {
+                        handlers = [handler];
+                    } else {
+                        for(k in mjp.nh[nid][ev_type]) {
+                            handlers.push(mjp.nh[nid][ev_type][k]);
+                        }
+                    }
+                    mjp(handlers).each(function (k, listener) {
                         if (node.removeEventListener) {
-                            node.removeEventListener(ev_type, getHandler(handler));
+                            node.removeEventListener(ev_type, getHandler(listener));
                         } else { // For IE8
-                            node.detachEvent("on"+ev_type, getHandler(handler));
+                            node.detachEvent("on"+ev_type, getHandler(listener));
                         }
                     });
                 });
