@@ -123,7 +123,49 @@ require(['../src/manipulation'], function (mjp) {
     });
 
     test("Test appendTo can move and copy already inserted node", function () {
-        mjp("span", ctx).appendTo("li");
+        mjp("span", ctx).appendTo(mjp("li", ctx));
+        ok(mjp("li span", ctx).length === 5, "Node was copied to target destinations");
+        ok(mjp("span", ctx).length === 5, "It was also moved since it doesn't exist anymore on previous");
+    });
+
+    /******************************************************
+     * PREPEND
+     ******************************************************/
+    test("Test prepend content string", function () {
+        var content = "<span>Test</span>";
+        mjp("#paragraph").prepend(content);
+        ok(mjp("#paragraph").html() === content + "Some text", "Content didn't match.");
+    });
+
+    test("Test prepend content node", function () {
+        var content = "<span>Test</span>";
+        mjp("#paragraph").prepend(mjp(content));
+        ok(mjp("#paragraph").html() === content + "Some text", "Content didn't match.");
+    });
+
+    test("Test prepend can move and copy already inserted node", function () {
+        mjp("li", ctx).prepend(mjp("span", ctx));
+        ok(mjp("li span", ctx).length === 5, "Node was copied to target destinations");
+        ok(mjp("span", ctx).length === 5, "It was also moved since it doesn't exist anymore on previous");
+    });
+
+    /******************************************************
+     * PREPENDTO
+     ******************************************************/
+    test("Test prependTo target selector", function () {
+        var content = "<span>Test</span>"
+        mjp(content).prependTo("#paragraph");
+        ok(mjp("#paragraph").html() === content + "Some text", "Content didn't match.");
+    });
+
+    test("Test prependTo target node", function () {
+        var content = "<span>Test</span>"
+        mjp(content).prependTo(mjp("#paragraph"));
+        ok(mjp("#paragraph").html() === content + "Some text", "Content didn't match.");
+    });
+
+    test("Test prependTo can move and copy already inserted node", function () {
+        mjp("span", ctx).prependTo(mjp("li", ctx));
         ok(mjp("li span", ctx).length === 5, "Node was copied to target destinations");
         ok(mjp("span", ctx).length === 5, "It was also moved since it doesn't exist anymore on previous");
     });

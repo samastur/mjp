@@ -81,7 +81,37 @@ define([
                 });
             });
             return this;
-        }
+        },
+
+        prepend: function () {
+            var nodes = mjp(arguments),
+                self = this;
+
+            nodes.each(function (j, n) {
+                var c = mjp(n).remove();
+                self.each(function (i, el) {
+                    el.insertBefore(c.clone()[0],
+                        // IE8 throws if second arg is undefined, but not if null
+                        el.firstChild || null);
+                });
+            });
+            return this;
+        },
+
+        prependTo: function (target) {
+            var $target = mjp(target);
+
+            this.each(function (i, el) {
+                var c = mjp(el).remove();
+                $target.each(function (j, n) {
+                    n.insertBefore(c.clone()[0],
+                        // IE8 throws if second arg is undefined, but not if null
+                        n.firstChild || null);
+                });
+            });
+            return this;
+        },
+
     });
 
     return mjp;
