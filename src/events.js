@@ -105,10 +105,12 @@ define([
                     var handlers = [], k;
                     if (handler) {
                         handlers = [handler];
-                    } else {
+                        delete mjp.nh[nid][ev_type][handler.mjp];
+                    } else { // Delete all of this type
                         for(k in mjp.nh[nid][ev_type]) {
                             handlers.push(mjp.nh[nid][ev_type][k]);
                         }
+                        delete mjp.nh[nid][ev_type];
                     }
                     mjp(handlers).each(function (k, listener) {
                         if (node.removeEventListener) {
@@ -118,6 +120,10 @@ define([
                         }
                     });
                 });
+                if (!ev_type) { // Removing all => clean up mapping
+                    delete mjp.nh[nid];
+                    node.removeAttribute("mjp");
+                }
             });
         },
 
