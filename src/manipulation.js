@@ -1,5 +1,6 @@
 define([
-    "./core"
+    "./core",
+    "./events",
 ], function (mjp) {
     // getAll and fixInput are modified versions from jQuery
     function getAll( ctx, tag ) {
@@ -48,10 +49,10 @@ define([
 
         remove: function () {
             this.each(function (i, el) {
+                // Remove handlers to prevent leaking memory
+                mjp(el).off();
                 if (el.parentNode) {
                     el.parentNode.removeChild(el);
-                    // WARNING/TODO: Does NOT remove handlers => leaks memory
-                    // Fix events first before you can fix this
                 }
             });
             return this;
