@@ -88,9 +88,30 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * APPEND
      ******************************************************/
-    test("Test append content as a string", function () {
-        var content = "<span>Test</span>"
+    test("Test append content string", function () {
+        var content = "<span>Test</span>";
         mjp("#paragraph").append(content);
+        ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
+    });
+
+    test("Test append content node", function () {
+        var content = "<span>Test</span>";
+        mjp("#paragraph").append(mjp(content));
+        ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
+    });
+
+    /******************************************************
+     * APPENDTO
+     ******************************************************/
+    test("Test appendTo target selector", function () {
+        var content = "<span>Test</span>"
+        mjp(content).appendTo("#paragraph");
+        ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
+    });
+
+    test("Test appendTo target node", function () {
+        var content = "<span>Test</span>"
+        mjp(content).appendTo(mjp("#paragraph"));
         ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
     });
 });

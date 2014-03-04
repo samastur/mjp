@@ -68,6 +68,18 @@ define([
                 });
             });
             return this;
+        },
+
+        appendTo: function (target) {
+            var $target = mjp(target);
+
+            this.each(function (i, el) {
+                $target.each(function (j, n) {
+                    var c = mjp(el).clone();
+                    n.appendChild(c[0]);
+                });
+            });
+            return this;
         }
     });
 
