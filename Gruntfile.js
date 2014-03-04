@@ -30,7 +30,9 @@ module.exports = function( grunt ) {
                 minimum: [
                     "core"
                 ],
-                removeWith: {}
+                removeWith: {
+                    ajax: ["ajaxplus"]
+                }
             }
         },
         jshint: {
@@ -134,7 +136,7 @@ module.exports = function( grunt ) {
     grunt.loadTasks( "build/tasks" );
 
     // Short list as a high frequency watch task
-    grunt.registerTask( "dev", [ "build:*:*:-ajaxplus", "jshint" ] );
+    grunt.registerTask( "dev", [ "build:*:*:-ajaxplus:-manipulation", "jshint" ] );
     grunt.registerTask( "devall", [ "build:*:*", "jshint" ] );
 
     // Test
@@ -144,5 +146,5 @@ module.exports = function( grunt ) {
     grunt.registerTask( "default", [ "dev", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
 
     // Kitchensink
-    grunt.registerTask( "kitchensink", [ "devall", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size", "manipulation" ] );
+    grunt.registerTask( "kitchensink", [ "devall", "pre-uglify", "uglify", "post-uglify", "dist:*", "compare_size" ] );
 };
