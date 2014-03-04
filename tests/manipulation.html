@@ -16,6 +16,7 @@
                 <li class="selected">Item 4</li>
                 <li>Item 5</li>
             </ul>
+            <span>Span</span>
         </div>
         <script src="lib/qunit-1.12.0.js"></script>
         <script>QUnit.config.autostart = false;</script>
@@ -100,6 +101,12 @@ require(['../src/manipulation'], function (mjp) {
         ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
     });
 
+    test("Test append can move and copy already inserted node", function () {
+        mjp("li", ctx).append(mjp("span", ctx));
+        ok(mjp("li span", ctx).length === 5, "Node was copied to target destinations");
+        ok(mjp("span", ctx).length === 5, "It was also moved since it doesn't exist anymore on previous");
+    });
+
     /******************************************************
      * APPENDTO
      ******************************************************/
@@ -114,6 +121,13 @@ require(['../src/manipulation'], function (mjp) {
         mjp(content).appendTo(mjp("#paragraph"));
         ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
     });
+
+    test("Test appendTo can move and copy already inserted node", function () {
+        mjp("span", ctx).appendTo("li");
+        ok(mjp("li span", ctx).length === 5, "Node was copied to target destinations");
+        ok(mjp("span", ctx).length === 5, "It was also moved since it doesn't exist anymore on previous");
+    });
+
 });
         </script>
     </body>

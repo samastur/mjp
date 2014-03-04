@@ -59,12 +59,13 @@ define([
         },
 
         append: function () {
-            var nodes = mjp(arguments);
+            var nodes = mjp(arguments),
+                self = this;
 
-            this.each(function (i, el) {
-                nodes.each(function (j, n) {
-                    var c = mjp(n).clone();
-                    el.appendChild(c[0]);
+            nodes.each(function (j, n) {
+                var c = mjp(n).remove();
+                self.each(function (i, el) {
+                    el.appendChild(c.clone()[0]);
                 });
             });
             return this;
@@ -74,9 +75,9 @@ define([
             var $target = mjp(target);
 
             this.each(function (i, el) {
+                var c = mjp(el).remove();
                 $target.each(function (j, n) {
-                    var c = mjp(el).clone();
-                    n.appendChild(c[0]);
+                    n.appendChild(c.clone()[0]);
                 });
             });
             return this;
