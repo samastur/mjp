@@ -92,22 +92,18 @@ define([
             return this;
         },
 
-        append: ap(function () { return []; }),
+        append: ap(function () { return [null]; }),
 
         prepend: ap(function (el) {
-                // IE8 raises on undefined second arg, but not on null
                 return [el.firstChild || null];
         }),
 
         appendTo: function (target) {
-            return apTo.call(this, target, function () {
-                return [];
-            });
+            return apTo.call(this, target, function () { return [null]; });
         },
 
         prependTo: function (target) {
             return apTo.call(this, target, function (el) {
-                // IE8 raises on undefined second arg, but not on null
                 return [el.firstChild || null];
             });
         }
