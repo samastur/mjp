@@ -25,21 +25,22 @@ define([
     }
 
     // General method for appendTo/prependTo
-    function apTo(target, op, args_func) {
+    function apTo(target, args_func) {
         var $target = mjp(target);
 
         this.each(function (i, el) {
             var c = mjp(el).remove();
             $target.each(function (j, n) {
                 var args = [c.clone()[0]].concat(args_func(n));
-                n[op].apply(n, args);
+                // appendChild(x) == insertBefore(x, null)
+                n.insertBefore.apply(n, args);
             });
         });
         return this;
     }
 
     // General method for append/prepend
-    function ap(op, args_func) {
+    function ap(args_func) {
         function _wrapped() {
             var nodes = mjp(arguments),
                 self = this;
@@ -48,7 +49,8 @@ define([
                 var c = mjp(n).remove();
                 self.each(function (i, el) {
                     var args = [c.clone()[0]].concat(args_func(el));
-                    el[op].apply(el, args);
+                    // appendChild(x) == insertBefore(x, null)
+                    el.insertBefore.apply(el, args);
                 });
             });
             return this;
@@ -90,23 +92,21 @@ define([
             return this;
         },
 
-        append: ap("appendChild", function () {
-                return [];
-        }),
+        append: ap(function () { return []; }),
 
-        prepend: ap("insertBefore", function (el) {
+        prepend: ap(function (el) {
                 // IE8 raises on undefined second arg, but not on null
                 return [el.firstChild || null];
         }),
 
         appendTo: function (target) {
-            return apTo.call(this, target, "appendChild", function () {
+            return apTo.call(this, target, function () {
                 return [];
             });
         },
 
         prependTo: function (target) {
-            return apTo.call(this, target, "insertBefore", function (el) {
+            return apTo.call(this, target, function (el) {
                 // IE8 raises on undefined second arg, but not on null
                 return [el.firstChild || null];
             });
