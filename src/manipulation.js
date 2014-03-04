@@ -24,7 +24,39 @@ define([
         }
     }
 
+    // General method for appendTo/prependTo
+    function apTo(target, op, args_func) {
+        var $target = mjp(target);
 
+        this.each(function (i, el) {
+            var c = mjp(el).remove();
+            $target.each(function (j, n) {
+                var args = [c.clone()[0]].concat(args_func(n));
+                n[op].apply(n, args);
+            });
+        });
+        return this;
+    }
+
+    // General method for append/prepend
+    function ap(op, args_func) {
+        function _wrapped() {
+            var nodes = mjp(arguments),
+                self = this;
+
+            nodes.each(function (j, n) {
+                var c = mjp(n).remove();
+                self.each(function (i, el) {
+                    var args = [c.clone()[0]].concat(args_func(el));
+                    el[op].apply(el, args);
+                });
+            });
+            return this;
+        }
+        return _wrapped;
+    }
+
+    // PUBLIC methods
     mjp.extend(mjp.fn, {
         clone: function () {
             var copies = [];
@@ -58,60 +90,27 @@ define([
             return this;
         },
 
-        append: function () {
-            var nodes = mjp(arguments),
-                self = this;
+        append: ap("appendChild", function () {
+                return [];
+        }),
 
-            nodes.each(function (j, n) {
-                var c = mjp(n).remove();
-                self.each(function (i, el) {
-                    el.appendChild(c.clone()[0]);
-                });
-            });
-            return this;
-        },
+        prepend: ap("insertBefore", function (el) {
+                // IE8 raises on undefined second arg, but not on null
+                return [el.firstChild || null];
+        }),
 
         appendTo: function (target) {
-            var $target = mjp(target);
-
-            this.each(function (i, el) {
-                var c = mjp(el).remove();
-                $target.each(function (j, n) {
-                    n.appendChild(c.clone()[0]);
-                });
+            return apTo.call(this, target, "appendChild", function () {
+                return [];
             });
-            return this;
-        },
-
-        prepend: function () {
-            var nodes = mjp(arguments),
-                self = this;
-
-            nodes.each(function (j, n) {
-                var c = mjp(n).remove();
-                self.each(function (i, el) {
-                    el.insertBefore(c.clone()[0],
-                        // IE8 throws if second arg is undefined, but not if null
-                        el.firstChild || null);
-                });
-            });
-            return this;
         },
 
         prependTo: function (target) {
-            var $target = mjp(target);
-
-            this.each(function (i, el) {
-                var c = mjp(el).remove();
-                $target.each(function (j, n) {
-                    n.insertBefore(c.clone()[0],
-                        // IE8 throws if second arg is undefined, but not if null
-                        n.firstChild || null);
-                });
+            return apTo.call(this, target, "insertBefore", function (el) {
+                // IE8 raises on undefined second arg, but not on null
+                return [el.firstChild || null];
             });
-            return this;
-        },
-
+        }
     });
 
     return mjp;

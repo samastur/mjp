@@ -4,7 +4,8 @@ define([
     "./events",
     "./deferred",
     "./ajax",
-    "./ajaxplus"
+    "./ajaxplus",
+    "./manipulation"
 ], function (mjp) {
     return (window.mjp = window.$ = mjp);
 });
