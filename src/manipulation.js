@@ -25,18 +25,21 @@ define([
     }
 
     // General method for appendTo/prependTo
-    function apTo(target, args_func) {
-        var $target = mjp(target);
+    function apTo(args_func) {
+        function _wrapped(target) {
+            var $target = mjp(target);
 
-        this.each(function (i, el) {
-            var c = mjp(el).remove();
-            $target.each(function (j, n) {
-                var args = [c.clone()[0]].concat(args_func(n));
-                // appendChild(x) == insertBefore(x, null)
-                n.insertBefore.apply(n, args);
+            this.each(function (i, el) {
+                var c = mjp(el).remove();
+                $target.each(function (j, n) {
+                    var args = [c.clone()[0]].concat(args_func(n));
+                    // appendChild(x) == insertBefore(x, null)
+                    n.insertBefore.apply(n, args);
+                });
             });
-        });
-        return this;
+            return this;
+        }
+        return _wrapped;
     }
 
     // General method for append/prepend
@@ -94,19 +97,11 @@ define([
 
         append: ap(function () { return [null]; }),
 
-        prepend: ap(function (el) {
-                return [el.firstChild || null];
-        }),
+        prepend: ap(function (el) { return [el.firstChild || null]; }),
 
-        appendTo: function (target) {
-            return apTo.call(this, target, function () { return [null]; });
-        },
+        appendTo: apTo(function () { return [null]; }),
 
-        prependTo: function (target) {
-            return apTo.call(this, target, function (el) {
-                return [el.firstChild || null];
-            });
-        }
+        prependTo: apTo(function (el) { return [el.firstChild || null]; })
     });
 
     return mjp;
