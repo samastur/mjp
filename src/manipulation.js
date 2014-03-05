@@ -24,7 +24,7 @@ define([
         }
     }
 
-    // General method for appendTo/prependTo
+    // General method for xTo methods
     function apTo(args_func) {
         function _wrapped(target) {
             var $target = mjp(target);
@@ -43,7 +43,9 @@ define([
         return _wrapped;
     }
 
-    // General method for append/prepend
+    // General method for not xTo add methods
+    // WARNING: ap&apTo could be generalized, but result produces bigger
+    //          zipped file
     function ap(args_func) {
         function _wrapped() {
             var nodes = mjp(arguments),
