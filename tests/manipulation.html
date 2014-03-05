@@ -44,7 +44,7 @@ require(['../src/manipulation'], function (mjp) {
 
     test("Test clone returns copies of multiple elements", function () {
         var els = mjp("li", ctx),
-            cloned = els.clone()
+            cloned = els.clone(),
             txt = "cloned";
 
         ok(els.length === cloned.length,
