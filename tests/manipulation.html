@@ -29,6 +29,8 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * CLONE
      ******************************************************/
+    module("clone");
+
     test("Test clone returns a copy of an element", function () {
         var el = mjp("<span>A</span>"),
             copy = el.clone();
@@ -61,6 +63,8 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * REMOVE
      ******************************************************/
+    module("remove");
+
      test("Test remove removes elements", function () {
          var removed = mjp("li.selected", ctx).remove(),
              correct_removal = true;
@@ -89,6 +93,8 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * APPEND
      ******************************************************/
+    module("append");
+
     test("Test append content string", function () {
         var content = "<span>Test</span>";
         mjp("#paragraph").append(content);
@@ -110,14 +116,16 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * APPENDTO
      ******************************************************/
+    module("appendTo");
+
     test("Test appendTo target selector", function () {
-        var content = "<span>Test</span>"
+        var content = "<span>Test</span>";
         mjp(content).appendTo("#paragraph");
         ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
     });
 
     test("Test appendTo target node", function () {
-        var content = "<span>Test</span>"
+        var content = "<span>Test</span>";
         mjp(content).appendTo(mjp("#paragraph"));
         ok(mjp("#paragraph").html() === "Some text" + content, "Content didn't match.");
     });
@@ -131,6 +139,8 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * PREPEND
      ******************************************************/
+    module("prepend");
+
     test("Test prepend content string", function () {
         var content = "<span>Test</span>";
         mjp("#paragraph").prepend(content);
@@ -152,14 +162,16 @@ require(['../src/manipulation'], function (mjp) {
     /******************************************************
      * PREPENDTO
      ******************************************************/
+    module("prependTo");
+
     test("Test prependTo target selector", function () {
-        var content = "<span>Test</span>"
+        var content = "<span>Test</span>";
         mjp(content).prependTo("#paragraph");
         ok(mjp("#paragraph").html() === content + "Some text", "Content didn't match.");
     });
 
     test("Test prependTo target node", function () {
-        var content = "<span>Test</span>"
+        var content = "<span>Test</span>";
         mjp(content).prependTo(mjp("#paragraph"));
         ok(mjp("#paragraph").html() === content + "Some text", "Content didn't match.");
     });
@@ -168,6 +180,132 @@ require(['../src/manipulation'], function (mjp) {
         mjp("span", ctx).prependTo(mjp("li", ctx));
         ok(mjp("li span", ctx).length === 5, "Node was copied to target destinations");
         ok(mjp("span", ctx).length === 5, "It was also moved since it doesn't exist anymore on previous");
+    });
+
+    /******************************************************
+     * AFTER
+     ******************************************************/
+    module("after");
+
+    test("Test after content string", function () {
+        var content = "<span>Test</span>", watched;
+        mjp("#paragraph").after(content);
+        watched = mjp("#paragraph")[0].nextSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name");
+        ok(watched.innerHTML === "Test", "Node has the right content");
+    });
+
+    test("Test after content node", function () {
+        var content = "<span>Test</span>", watched;
+        mjp("#paragraph").after(mjp(content));
+        watched = mjp("#paragraph")[0].nextSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name");
+        ok(watched.innerHTML === "Test", "Node has the right content");
+    });
+
+    test("Test after can move and copy already inserted node", function () {
+        mjp("ul", ctx).after(mjp("p", ctx));
+        ok(mjp("ul", ctx)[0].nextSibling.tagName.toLowerCase() === "p",
+            "Node was copied to target destinations");
+        ok(mjp("p", ctx).length === 1,
+            "It was also moved since it doesn't exist anymore on previous");
+    });
+
+    /******************************************************
+     * INSERTAFTER
+     ******************************************************/
+    module("insertAfter");
+
+    test("Test insertAfter target selector", function () {
+        var content = "<span>Test</span>", watched;
+        mjp(content).insertAfter("#paragraph");
+        watched = mjp("#paragraph")[0].nextSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name.");
+        ok(watched.innerHTML === "Test", "Node has the right content.");
+    });
+
+    test("Test insertAfter target node", function () {
+        var content = "<span>Test</span>", watched;
+        mjp(content).insertAfter(mjp("#paragraph"));
+        watched = mjp("#paragraph")[0].nextSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name.");
+        ok(watched.innerHTML === "Test", "Node has the right content.");
+    });
+
+    test("Test insertAfter can move and copy already inserted node", function () {
+        var watched;
+        mjp("span", ctx).insertAfter(mjp("p", ctx));
+        watched = mjp("#paragraph")[0].nextSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node was copied to target destinations");
+        ok(mjp("span", ctx).length === 1, "It was also moved since it doesn't exist anymore on previous");
+    });
+
+    /******************************************************
+     * BEFORE
+     ******************************************************/
+    module("before");
+
+    test("Test before content string", function () {
+        var content = "<span>Test</span>", watched;
+        mjp("#paragraph").before(content);
+        watched = mjp("#paragraph")[0].previousSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name");
+        ok(watched.innerHTML === "Test", "Node has the right content");
+    });
+
+    test("Test before content node", function () {
+        var content = "<span>Test</span>", watched;
+        mjp("#paragraph").before(mjp(content));
+        watched = mjp("#paragraph")[0].previousSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name");
+        ok(watched.innerHTML === "Test", "Node has the right content");
+    });
+
+    test("Test before can move and copy already inserted node", function () {
+        mjp("span", ctx).before(mjp("p", ctx));
+        ok(mjp("span", ctx)[0].previousSibling.tagName.toLowerCase() === "p",
+            "Node was copied to target destinations");
+        ok(mjp("p", ctx).length === 1,
+            "It was also moved since it doesn't exist anymore on previous");
+    });
+
+    /******************************************************
+     * INSERTBEFORE
+     ******************************************************/
+    module("insertBefore");
+
+    test("Test insertBefore target selector", function () {
+        var content = "<span>Test</span>", watched;
+        mjp(content).insertBefore("#paragraph");
+        watched = mjp("#paragraph")[0].previousSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name.");
+        ok(watched.innerHTML === "Test", "Node has the right content.");
+    });
+
+    test("Test insertBefore target node", function () {
+        var content = "<span>Test</span>", watched;
+        mjp(content).insertBefore(mjp("#paragraph"));
+        watched = mjp("#paragraph")[0].previousSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node has the right tag name.");
+        ok(watched.innerHTML === "Test", "Node has the right content.");
+    });
+
+    test("Test insertBefore can move and copy already inserted node", function () {
+        var watched;
+        mjp("span", ctx).insertBefore(mjp("p", ctx));
+        watched = mjp("#paragraph")[0].previousSibling;
+
+        ok(watched.tagName.toLowerCase() === "span", "Node was copied to target destinations");
+        ok(mjp("span", ctx).length === 1, "It was also moved since it doesn't exist anymore on previous");
     });
 
 });

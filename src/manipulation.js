@@ -32,9 +32,10 @@ define([
             this.each(function (i, el) {
                 var c = mjp(el).remove();
                 $target.each(function (j, n) {
-                    var args = [c.clone()[0]].concat(args_func(n));
+                    var params = args_func(n),
+                        args = [c.clone()[0]].concat(params[1]);
                     // appendChild(x) == insertBefore(x, null)
-                    n.insertBefore.apply(n, args);
+                    params[0].insertBefore.apply(params[0], args);
                 });
             });
             return this;
@@ -51,9 +52,10 @@ define([
             nodes.each(function (j, n) {
                 var c = mjp(n).remove();
                 self.each(function (i, el) {
-                    var args = [c.clone()[0]].concat(args_func(el));
+                    var params = args_func(el),
+                        args = [c.clone()[0]].concat(params[1]);
                     // appendChild(x) == insertBefore(x, null)
-                    el.insertBefore.apply(el, args);
+                    params[0].insertBefore.apply(params[0], args);
                 });
             });
             return this;
@@ -95,13 +97,27 @@ define([
             return this;
         },
 
-        append: ap(function () { return [null]; }),
+        append: ap(function (el) { return [el, [null]]; }),
 
-        prepend: ap(function (el) { return [el.firstChild || null]; }),
+        prepend: ap(function (el) { return [el, [el.firstChild || null]]; }),
 
-        appendTo: apTo(function () { return [null]; }),
+        appendTo: apTo(function (el) { return [el, [null]]; }),
 
-        prependTo: apTo(function (el) { return [el.firstChild || null]; })
+        prependTo: apTo(function (el) {
+            return [el, [el.firstChild || null]];
+        }),
+
+        after: ap(function (el) {
+            return [el.parentNode, [el.nextSibling || null]];
+        }),
+
+        before: ap(function (el) { return [el.parentNode, [el]]; }),
+
+        insertAfter: apTo(function (el) {
+            return [el.parentNode, [el.nextSibling || null]];
+        }),
+
+        insertBefore: apTo(function (el) { return [el.parentNode, [el]]; })
     });
 
     return mjp;
