@@ -7,8 +7,7 @@
     </head>
     <body>
         <div id="qunit"></div>
-        <div id="qunit-fixture">
-            <p id="paragraph">Some text</p>
+        <div id="qunit-fixture"><p id="paragraph">Some text</p>
             <ul>
                 <li>Item 1</li>
                 <li class="selected">Item 2</li>
@@ -308,6 +307,47 @@ require(['../src/manipulation'], function (mjp) {
         ok(mjp("span", ctx).length === 1, "It was also moved since it doesn't exist anymore on previous");
     });
 
+    /******************************************************
+     * REPLACEWITH
+     ******************************************************/
+    module("replaceWith");
+
+    test("Test replaceWith content string", function () {
+        var content = "<span id='replaced'>Test</span>";
+        mjp("#paragraph").replaceWith(content);
+
+        ok(mjp("#paragraph").length === 0, "Original node has been removed");
+        ok(ctx.firstChild.id === "replaced", "New node has replaced original");
+    });
+
+    test("Test replaceWith content node", function () {
+        var content = "<span id='replaced'>Test</span>";
+        mjp("#paragraph").replaceWith(mjp(content));
+
+        ok(mjp("#paragraph").length === 0, "Original node has been removed");
+        ok(ctx.firstChild.id === "replaced", "New node has replaced original");
+    });
+
+    /******************************************************
+     * REPLACEALL
+     ******************************************************/
+    module("replaceAll");
+
+    test("Test replaceAll content string", function () {
+        var content = "<span id='replaced'>Test</span>";
+        mjp(content).replaceAll("#paragraph");
+
+        ok(mjp("#paragraph").length === 0, "Original node has been removed");
+        ok(ctx.firstChild.id === "replaced", "New node has replaced original");
+    });
+
+    test("Test replaceAll content node", function () {
+        var content = "<span id='replaced'>Test</span>";
+        mjp(content).replaceAll("#paragraph");
+
+        ok(mjp("#paragraph").length === 0, "Original node has been removed");
+        ok(ctx.firstChild.id === "replaced", "New node has replaced original");
+    });
 });
         </script>
     </body>

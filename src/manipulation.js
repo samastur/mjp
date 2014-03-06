@@ -24,46 +24,54 @@ define([
         }
     }
 
-    // General method for xTo methods
-    function apTo(args_func) {
-        function _wrapped(target) {
-            var $target = mjp(target);
+    function manipulateTo(op) {
+        function apTo(args_func) {
+            function _wrapped(target) {
+                var $target = mjp(target);
 
-            this.each(function (i, el) {
-                var c = mjp(el).remove();
-                $target.each(function (j, n) {
-                    var params = args_func(n),
-                        args = [c.clone()[0]].concat(params[1]);
-                    // appendChild(x) == insertBefore(x, null)
-                    params[0].insertBefore.apply(params[0], args);
+                this.each(function (i, el) {
+                    var c = mjp(el).remove();
+                    $target.each(function (j, n) {
+                        var params = args_func(n),
+                            args = [c.clone()[0]].concat(params[1]);
+                        params[0][op].apply(params[0], args);
+                    });
                 });
-            });
-            return this;
+                return this;
+            }
+            return _wrapped;
         }
-        return _wrapped;
+        return apTo;
     }
 
+    function manipulate(op) {
+        function ap(args_func) {
+            function _wrapped() {
+                var nodes = mjp(arguments),
+                    self = this;
+
+                nodes.each(function (j, n) {
+                    var c = mjp(n).remove();
+                    self.each(function (i, el) {
+                        var params = args_func(el),
+                            args = [c.clone()[0]].concat(params[1]);
+                        params[0][op].apply(params[0], args);
+                    });
+                });
+                return this;
+            }
+            return _wrapped;
+        }
+        return ap;
+    }
     // General method for not xTo add methods
     // WARNING: ap&apTo could be generalized, but result produces bigger
     //          zipped file
-    function ap(args_func) {
-        function _wrapped() {
-            var nodes = mjp(arguments),
-                self = this;
-
-            nodes.each(function (j, n) {
-                var c = mjp(n).remove();
-                self.each(function (i, el) {
-                    var params = args_func(el),
-                        args = [c.clone()[0]].concat(params[1]);
-                    // appendChild(x) == insertBefore(x, null)
-                    params[0].insertBefore.apply(params[0], args);
-                });
-            });
-            return this;
-        }
-        return _wrapped;
-    }
+    var ap = manipulate("insertBefore"), // appendChild(x) == insertBefore(x, null)
+        // General method for xTo methods
+        apTo = manipulateTo("insertBefore"),
+        replace = manipulate("replaceChild"),
+        replaceTo = manipulateTo("replaceChild");
 
     // PUBLIC methods
     mjp.extend(mjp.fn, {
@@ -119,7 +127,11 @@ define([
             return [el.parentNode, [el.nextSibling || null]];
         }),
 
-        insertBefore: apTo(function (el) { return [el.parentNode, [el]]; })
+        insertBefore: apTo(function (el) { return [el.parentNode, [el]]; }),
+
+        replaceWith: replace(function (el) { return [el.parentNode, [el]]; }),
+
+        replaceAll: replaceTo(function (el) { return [el.parentNode, [el]]; }),
     });
 
     return mjp;
