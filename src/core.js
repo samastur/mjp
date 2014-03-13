@@ -83,6 +83,7 @@ define(function () {
                     this.each(function (i, el) {
                         el.innerHTML = value;
                     });
+                    return this;
                 } else {
                     return this.length ? this[0].innerHTML : "";
                 }

@@ -108,6 +108,20 @@ require(['../src/core'], function (mjp) {
         equal(html, new_html, "HTML was set correctly.");
     });
 
+    test("Test mjp returns same mjp object after it set the content", function () {
+        var html = "", new_html = "<span>New text</span>", obj;
+
+        obj = mjp("#paragraph");
+        obj = obj.html(new_html);
+        html = document.getElementById("paragraph").innerHTML;
+        equal(html, new_html, "HTML was set correctly.");
+
+        obj.html("New content");
+        html = document.getElementById("paragraph").innerHTML;
+        equal(html, "New content", "Second call was also successful.");
+
+    });
+
     test("Test .each method", function () {
         var inarray = [1,2,3,4], expected = [1,3,5,7];
         mjp(inarray).each(function (i, el) { inarray[i]=i+el; });
