@@ -73,6 +73,21 @@ define([
         replace = manipulate("replaceChild"),
         replaceTo = manipulateTo("replaceChild");
 
+
+    // General method for removing objects
+    function _remove(remove_handlers) {
+        return function () {
+            var removed = [];
+            this.each(function (i, el) {
+                // Remove handlers to prevent leaking memory
+                remove_handlers && mjp(el).off();
+                removed.push(
+                    el.parentNode ? el.parentNode.removeChild(el) : el);
+            });
+            return mjp(removed);
+        };
+    }
+
     // PUBLIC methods
     mjp.extend(mjp.fn, {
         // Cloning and removing objects
@@ -97,16 +112,9 @@ define([
             return mjp(copies);
         },
 
-        remove: function () {
-            this.each(function (i, el) {
-                // Remove handlers to prevent leaking memory
-                mjp(el).off();
-                if (el.parentNode) {
-                    el.parentNode.removeChild(el);
-                }
-            });
-            return this;
-        },
+        detach: _remove(),
+
+        remove: _remove(true),
 
         // Inserting content
         append: ap(function (el) { return [el, [null]]; }),

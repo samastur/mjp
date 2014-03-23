@@ -84,11 +84,62 @@ require(['../src/manipulation'], function (mjp) {
 
      test("Test removing unattached elements just returns them", function () {
          var els = [
-             mjp("<span>A</span>"),
+             mjp('<span href="#">A</span>'),
              mjp("<p>B</p>")
-         ], removed;
+         ], removed, counter = 0;
+         els[0].on("click", function () { counter += 1; });
+         if (els[0][0].click) {  // phantomjs gets confused on this part
+             els[0][0].click();
+             equal(counter, 1, "Listener is attached");
+         }
+
          removed = mjp(els).remove();
          deepEqual(els, removed, "Removed elements are the same");
+         if (els[0][0].click) {  // phantomjs gets confused on this part
+             els[0][0].click();
+             equal(counter, 1, "Listener is not attached anymore");
+         }
+     });
+
+    /******************************************************
+     * DETACH
+     ******************************************************/
+    module("detach");
+
+     test("Test detach detaches elements", function () {
+         var detachd = mjp("li.selected", ctx).detach(),
+             correct_removal = true;
+         ok(mjp("li", ctx).length === 3, "The right number of list items left");
+         ok(mjp("li.selected", ctx).length === 0, "List does not contain selected items anymore");
+         ok(detachd.length == 2, "Right number of detached items");
+
+         detachd.each(function (i, el) {
+             correct_removal = el.className === "selected";
+             if (!correct_removal) {
+                 return false;
+             }
+         });
+         ok(correct_removal, "The right ones were detached.");
+     });
+
+     test("Test detaching unattached elements just returns them", function () {
+         var els = [
+             mjp('<span>A</span>'),
+             mjp("<p>B</p>")
+         ], detached, counter = 0;
+         els[0].on("click", function () { counter += 1; });
+         if (els[0][0].click) {  // phantomjs gets confused on this part
+             els[0][0].click();
+             equal(counter, 1, "Listener is attached");
+         }
+
+         detached = mjp(els).detach();
+         deepEqual(els, detached, "detached elements are the same");
+
+         if (els[0][0].click) {  // phantomjs gets confused on this part
+             els[0][0].click();
+             equal(counter, 2, "Listener is still attached");
+         }
      });
 
     /******************************************************
