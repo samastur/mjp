@@ -75,6 +75,7 @@ define([
 
     // PUBLIC methods
     mjp.extend(mjp.fn, {
+        // Cloning and removing objects
         clone: function () {
             var copies = [];
             this.each(function (j, el) {
@@ -107,6 +108,7 @@ define([
             return this;
         },
 
+        // Inserting content
         append: ap(function (el) { return [el, [null]]; }),
 
         prepend: ap(function (el) { return [el, [el.firstChild || null]]; }),
@@ -132,6 +134,29 @@ define([
         replaceWith: replace(function (el) { return [el.parentNode, [el]]; }),
 
         replaceAll: replaceTo(function (el) { return [el.parentNode, [el]]; }),
+
+        // Attributes and properties
+        attr: function (attribute, value) {
+            if (value !== undefined) {
+                this.each(function (i, el) {
+                    el.setAttribute(attribute, value);
+                });
+                return this;
+            } else if (this.length) {
+                return this[0].getAttribute(attribute);
+            }
+        },
+
+        prop: function (attribute, value) {
+            if (value !== undefined) {
+                this.each(function (i, el) {
+                    el[attribute] = value;
+                });
+                return this;
+            } else if (this.length) {
+                return this[0][attribute];
+            }
+        }
     });
 
     return mjp;

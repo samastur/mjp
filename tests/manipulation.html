@@ -16,6 +16,8 @@
                 <li>Item 5</li>
             </ul>
             <span>Span</span>
+            <input type="text" id="inp" />
+            <input type="checkbox" id="check" checked="checked" />
         </div>
         <script src="lib/qunit-1.12.0.js"></script>
         <script>QUnit.config.autostart = false;</script>
@@ -348,6 +350,58 @@ require(['../src/manipulation'], function (mjp) {
         ok(mjp("#paragraph").length === 0, "Original node has been removed");
         ok(ctx.firstChild.id === "replaced", "New node has replaced original");
     });
+
+    /******************************************************
+     * ATTR
+     ******************************************************/
+     module("attr");
+
+     test("Test attr reads correct values", function () {
+         var $inp = mjp("#inp", ctx),
+             $check = mjp("#check", ctx);
+
+        equal($check.attr("checked"), "checked", "Read value is correct");
+        equal($inp.attr("notthere"), undefined, "Read value is correct");
+     });
+
+     test("Test attr sets correct values", function () {
+         var $inp = mjp("#inp", ctx),
+             $check = mjp("#check", ctx);
+
+        equal($inp.attr("value"), undefined, "Input has no value yet");
+        $inp.attr("value", "Happy bunny");
+        equal($inp.attr("value"), "Happy bunny", "Input now has the correct value.");
+
+        equal($check.attr("checked"), "checked", "Read value is correct");
+        $check.attr("checked", "");
+        equal($check.attr("checked"), "", "Correctly changed checkbox value");
+     });
+
+    /******************************************************
+     * PROP
+     ******************************************************/
+     module("prop");
+
+     test("Test prop reads correct values", function () {
+         var $inp = mjp("#inp", ctx),
+             $check = mjp("#check", ctx);
+
+        equal($check.prop("checked"), true, "Read value is correct");
+        equal($inp.prop("notthere"), undefined, "Read value is correct");
+     });
+
+     test("Test prop sets correct values", function () {
+         var $inp = mjp("#inp", ctx),
+             $check = mjp("#check", ctx);
+
+        equal($inp.prop("value"), "", "Input has no value yet");
+        $inp.prop("value", "Happy bunny");
+        equal($inp.prop("value"), "Happy bunny", "Input now has the correct value.");
+
+        equal($check.prop("checked"), true, "Read value is correct");
+        $check.prop("checked", false);
+        equal($check.prop("checked"), false, "Correctly changed checkbox value");
+     });
 });
         </script>
     </body>
