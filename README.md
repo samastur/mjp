@@ -20,7 +20,7 @@ package if you haven't before. These should be done as global installs:
 npm install -g grunt-cli
 ```
 
-Also install phantomjs if you haven't yet (required only if you intend to run tests):
+Also install phantomjs if you haven't yet (required only for running tests):
 
 ```bash
 npm install -g phantomjs
